@@ -1,15 +1,44 @@
 [tool.poetry]
 name = "changeloggh"
 version = "0.1.0"
-description = ""
+description = "changeloggh is a command line tool that generates changelog files for github"
 authors = ["Saúl Piña <sauljabin@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/sauljabin/changeloggh"
+repository = "https://github.com/sauljabin/changeloggh"
+keywords = ["changelog", "changeloggh"]
+classifiers = [
+    "Environment :: Console",
+    "Operating System :: MacOS",
+    "Operating System :: Unix"
+]
+include = ["LICENSE"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+click = "^8"
+rich = "^13"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+unittest = "*"
+ruff = "*"
+black = "^23"
+faker = "^17"
+coverage = {extras = ["toml"], version = "^7"}
+
+[tool.coverage.run]
+source = ["changeloggh"]
+branch = true
+omit = ["*tests/*", "*scripts/*", "*__init__.py", "changeloggh/__main__.py"]
+
+[tool.coverage.report]
+exclude_lines = ['if __name__ == "__main__":']
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+changeloggh = "changeloggh.cli:main"
+clgh = "changeloggh.cli:main"
