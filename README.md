@@ -1,5 +1,16 @@
 # changeloggh
 
+<a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/-python-success?logo=python&logoColor=white"></a>
+<a href="https://github.com/sauljabin/changeloglg"><img alt="GitHub" src="https://img.shields.io/badge/status-active-brightgreen"></a>
+<a href="https://github.com/sauljabin/changeloglg/blob/main/LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/sauljabin/changeloglg"></a>
+<a href="https://github.com/sauljabin/changeloglg/actions"><img alt="GitHub Actions" src="https://img.shields.io/github/actions/workflow/status/sauljabin/changeloglg/main.yml?branch=main"></a>
+<a href="https://app.codecov.io/gh/sauljabin/changeloglg"><img alt="Codecov" src="https://img.shields.io/codecov/c/github/sauljabin/changeloglg"></a>
+<a href="https://pypi.org/project/changeloglg"><img alt="Python Versions" src="https://img.shields.io/pypi/pyversions/changeloglg"></a>
+<a href="https://pypi.org/project/changeloglg"><img alt="Version" src="https://img.shields.io/pypi/v/changeloglg"></a>
+<a href="https://libraries.io/pypi/changeloglg"><img alt="Dependencies" src="https://img.shields.io/librariesio/release/pypi/changeloglg"></a>
+<a href="https://pypi.org/project/changeloglg"><img alt="Platform" src="https://img.shields.io/badge/platform-linux%20%7C%20osx-blueviolet"></a>
+
+
 `changeloggh` is a command line tool 
 that generates and administrate changelog files for GitHub
 according to https://keepachangelog.com/en/1.1.0/.
