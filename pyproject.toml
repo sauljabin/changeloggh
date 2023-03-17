@@ -19,6 +19,7 @@ include = ["LICENSE"]
 python = "^3.10"
 click = "^8"
 rich = "^13"
+markdown-to-json = "^1"
 
 [tool.poetry.dev-dependencies]
 unittest = "*"
