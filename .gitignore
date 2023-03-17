@@ -177,6 +177,3 @@ cython_debug/
 
 # ruff
 .ruff_cache/
-
-# CLI
-CHANGELOG.md

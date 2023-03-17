@@ -25,9 +25,7 @@ def main():
 
 
 @main.command("init")
-@click.option(
-    "--force", is_flag=True, default=False, help="Force saving an empty CHANGELOG file."
-)
+@click.option("--force", is_flag=True, default=False, help="Force saving an empty CHANGELOG file.")
 def init(force: bool):
     path = Path(CHANGELOG_PATH)
 

@@ -35,9 +35,7 @@ class TestApp(TestCase):
 
         mock_class_path.assert_called_once_with("./CHANGELOG.md")
         mock_function_open.assert_called_with(mock_class_path.return_value, "w")
-        mock_function_open.return_value.write.assert_called_once_with(
-            CHANGELOG_TEMPLATE
-        )
+        mock_function_open.return_value.write.assert_called_once_with(CHANGELOG_TEMPLATE)
         self.assertEqual(0, result.exit_code)
 
     @patch("builtins.open", new_callable=mock_open)
@@ -50,7 +48,5 @@ class TestApp(TestCase):
 
         mock_class_path.assert_called_once_with("./CHANGELOG.md")
         mock_function_open.assert_called_with(mock_class_path.return_value, "w")
-        mock_function_open.return_value.write.assert_called_once_with(
-            CHANGELOG_TEMPLATE
-        )
+        mock_function_open.return_value.write.assert_called_once_with(CHANGELOG_TEMPLATE)
         self.assertEqual(0, result.exit_code)
