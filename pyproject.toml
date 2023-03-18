@@ -19,7 +19,7 @@ include = ["LICENSE"]
 python = "^3.10"
 click = "^8"
 rich = "^13"
-markdown-to-json = "^1"
+jinja2 = "^3"
 
 [tool.poetry.dev-dependencies]
 unittest = "*"
@@ -27,7 +27,6 @@ ruff = "*"
 black = "^23"
 faker = "^17"
 coverage = {extras = ["toml"], version = "^7"}
-changelog-cli = "*"
 toml = "*"
 
 [tool.black]

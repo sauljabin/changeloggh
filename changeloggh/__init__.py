@@ -1,3 +1,5 @@
 import pkg_resources
 
-__version__ = VERSION = pkg_resources.get_distribution("changeloggh").version
+NAME = "changeloggh"
+
+__version__ = VERSION = pkg_resources.get_distribution(NAME).version
