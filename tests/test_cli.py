@@ -1,10 +1,12 @@
 from unittest import TestCase
-from unittest.mock import patch, mock_open
+from unittest.mock import patch, call, MagicMock
 
 from click.testing import CliRunner
 
 from changeloggh import VERSION
-from changeloggh.cli import main, CHANGELOG_TEMPLATE
+from changeloggh.changelog import Changelog
+from changeloggh.cli import main
+from tests.test_changelog import DATA_EXAMPLE, REPO_INPUT, CHANGELOG_EXAMPLE, JSON_INDENT_EXAMPLE
 
 
 class TestApp(TestCase):
@@ -19,34 +21,85 @@ class TestApp(TestCase):
         runner = CliRunner()
         mock_class_path.return_value.exists.return_value = True
 
-        result = runner.invoke(main, ["init"])
+        result = runner.invoke(main, ["init", REPO_INPUT])
 
-        mock_class_path.assert_called_once_with("./CHANGELOG.md")
+        mock_class_path.assert_has_calls([call("./CHANGELOG.md"), call().exists()])
+        # , call("./changelog.lock"), call().exists()
         self.assertEqual(1, result.exit_code)
-        self.assertIn("./CHANGELOG.md file already exists", result.output)
+        self.assertEqual(
+            "./CHANGELOG.md file already exists. Use --force to override the file.",
+            result.output.strip(),
+        )
 
-    @patch("builtins.open", new_callable=mock_open)
     @patch("changeloggh.cli.Path")
-    def test_init_changelog_file(self, mock_class_path, mock_function_open):
+    def test_reject_init_if_lock_file_already_exists(self, mock_class_path):
         runner = CliRunner()
-        mock_class_path.return_value.exists.return_value = False
+        mock_class_path.return_value.exists.side_effect = [False, True]
 
-        result = runner.invoke(main, ["init"])
+        result = runner.invoke(main, ["init", REPO_INPUT])
 
-        mock_class_path.assert_called_once_with("./CHANGELOG.md")
-        mock_function_open.assert_called_with(mock_class_path.return_value, "w")
-        mock_function_open.return_value.write.assert_called_once_with(CHANGELOG_TEMPLATE)
+        mock_class_path.assert_has_calls(
+            [call("./CHANGELOG.md"), call().exists(), call("./changelog.lock"), call().exists()]
+        )
+        self.assertEqual(1, result.exit_code)
+        self.assertEqual(
+            "./changelog.lock file already exists. Use --force to override the file.",
+            result.output.strip(),
+        )
+
+    @patch("changeloggh.cli.empty_changelog")
+    @patch("changeloggh.cli.Path")
+    def test_init_changelog_file(self, mock_class_path, mock_function_empty):
+        mock_class_path.return_value.exists.side_effect = [False, False]
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["init", REPO_INPUT])
+
+        mock_function_empty.assert_called_with(REPO_INPUT)
+        mock_function_empty.return_value.save.assert_called_once()
         self.assertEqual(0, result.exit_code)
 
-    @patch("builtins.open", new_callable=mock_open)
-    @patch("changeloggh.cli.Path")
-    def test_force_init_changelog_file(self, mock_class_path, mock_function_open):
+    @patch("changeloggh.cli.empty_changelog")
+    def test_force_init_changelog_file(self, mock_function_empty):
+        mock_function_empty.return_value = MagicMock()
+
         runner = CliRunner()
-        mock_class_path.return_value.exists.return_value = True
+        result = runner.invoke(main, ["init", "--force", REPO_INPUT])
 
-        result = runner.invoke(main, ["init", "--force"])
+        mock_function_empty.assert_called_with(REPO_INPUT)
+        mock_function_empty.return_value.save.assert_called_once()
+        self.assertEqual(0, result.exit_code)
 
-        mock_class_path.assert_called_once_with("./CHANGELOG.md")
-        mock_function_open.assert_called_with(mock_class_path.return_value, "w")
-        mock_function_open.return_value.write.assert_called_once_with(CHANGELOG_TEMPLATE)
+    @patch("changeloggh.cli.load_changelog")
+    def test_print_text(self, mock_function_load):
+        mock_function_load.return_value = Changelog(DATA_EXAMPLE)
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["print", "--format", "text"])
+
+        self.assertEqual(0, result.exit_code)
+        self.assertEqual(CHANGELOG_EXAMPLE, result.output.strip())
+
+    @patch("changeloggh.cli.load_changelog")
+    def test_print_json(self, mock_function_load):
+        mock_function_load.return_value = Changelog(DATA_EXAMPLE)
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["print", "--format", "json"])
+
+        self.assertEqual(0, result.exit_code)
+        self.assertEqual(JSON_INDENT_EXAMPLE, result.output.strip())
+
+    @patch("changeloggh.cli.Markdown")
+    @patch("changeloggh.cli.Console")
+    @patch("changeloggh.cli.load_changelog")
+    def test_print_default(self, mock_function_load, mock_console_function, mock_md_class):
+        cl = Changelog(DATA_EXAMPLE)
+        mock_function_load.return_value = cl
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["print"])
+
+        mock_md_class.assert_called_once_with(cl.to_string())
+        mock_console_function.return_value.print.assert_called_once_with(mock_md_class.return_value)
         self.assertEqual(0, result.exit_code)

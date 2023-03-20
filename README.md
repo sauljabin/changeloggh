@@ -10,7 +10,6 @@
 <a href="https://libraries.io/pypi/changeloggh"><img alt="Dependencies" src="https://img.shields.io/librariesio/release/pypi/changeloggh"></a>
 <a href="https://pypi.org/project/changeloggh"><img alt="Platform" src="https://img.shields.io/badge/platform-linux%20%7C%20osx-blueviolet"></a>
 
-
 `changeloggh` is a command line tool
 that generates and administrate changelog files for GitHub
 according to https://keepachangelog.com/en/1.1.0/.
@@ -90,3 +89,14 @@ git tag $(poetry version -s)
 git push origin main
 git push --tags
 ```
+
+## Why a lock file?
+
+
+
+# TODO
+
+- add command for adding new change
+- import from md
+- readme
+- bump script

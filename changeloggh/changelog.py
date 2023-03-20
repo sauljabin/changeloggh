@@ -3,6 +3,10 @@ import json
 from jinja2 import Environment
 
 from changeloggh.url_utils import url_join
+from changeloggh.version_utils import version_comparator
+
+CHANGELOG_PATH = "./CHANGELOG.md"
+CHANGELOG_LOCK_PATH = "./changelog.lock"
 
 LINK_KEY = "link"
 
@@ -31,12 +35,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 """
 
 
-def parser():
+def parse_changelog():
     pass
 
 
-def load():
-    pass
+def load_changelog():
+    with open(CHANGELOG_LOCK_PATH, "r") as content:
+        input_data = json.load(content)
+    return Changelog(input_data)
+
+
+def empty_changelog(repository=""):
+    return Changelog(
+        {
+            "repository": repository,
+            "versions": [
+                {
+                    "version": "Unreleased",
+                }
+            ],
+        }
+    )
 
 
 class Changelog:
@@ -51,6 +70,8 @@ class Changelog:
 
         if self.data.get(REPOSITORY_KEY) is None:
             self.data[REPOSITORY_KEY] = ""
+
+        self.data[VERSIONS_KEY].sort(key=version_comparator())
 
     def __str__(self):
         return self.to_string()
@@ -92,12 +113,39 @@ class Changelog:
     def to_dict(self):
         return self.data
 
-    def to_json(self, indent=None):
+    def to_json(self, indent: int = None):
         return json.dumps(self.data, indent=indent)
+
+    def save(self):
+        with open(CHANGELOG_PATH, "w") as file:
+            file.write(self.to_string())
+
+        with open(CHANGELOG_LOCK_PATH, "w") as file:
+            file.write(self.to_json(indent=4))
 
 
 if __name__ == "__main__":
-    cl = Changelog({})
+    data = {
+        "repository": "https://github.com/sauljabin/changeloggh",
+        "versions": [
+            {
+                "version": "Unreleased",
+            },
+            {
+                "version": "0.0.1",
+                "date": "2023-03-17",
+                "changes": [
+                    {
+                        "type": "Added",
+                        "list": [
+                            "Initial setup",
+                        ],
+                    },
+                ],
+            },
+        ],
+    }
+    cl = Changelog(data)
     print(cl.to_string())
     print(cl.to_dict())
     print(cl.to_json(indent=True))

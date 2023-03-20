@@ -1,8 +1,11 @@
 import json
 from pathlib import Path
 from unittest import TestCase
+from unittest.mock import patch, mock_open, call
 
-from changeloggh.changelog import Changelog
+from changeloggh.changelog import Changelog, empty_changelog, load_changelog
+
+REPO_INPUT = "https://github.com/sauljabin/changeloggh"
 
 CHANGELOG_HEADER = """
 # Changelog
@@ -18,22 +21,40 @@ CHANGELOG_EXAMPLE = f"""
 
 ## [Unreleased]
 
+## [1.0.1] - 2023-03-17
+
+### Added
+
+- Tests
+
 ## [0.0.1] - 2023-03-17
 
 ### Added
 
 - Initial setup
 
-[Unreleased]: https://github.com/sauljabin/changeloggh/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/sauljabin/changeloggh/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/sauljabin/changeloggh/compare/v0.0.1...v1.0.1
 [0.0.1]: https://github.com/sauljabin/changeloggh/releases/tag/v0.0.1
 """.strip()
 
-
 DATA_EXAMPLE = {
-    "repository": "https://github.com/sauljabin/changeloggh",
+    "repository": REPO_INPUT,
     "versions": [
         {
             "version": "Unreleased",
+        },
+        {
+            "version": "1.0.1",
+            "date": "2023-03-17",
+            "changes": [
+                {
+                    "type": "Added",
+                    "list": [
+                        "Tests",
+                    ],
+                },
+            ],
         },
         {
             "version": "0.0.1",
@@ -51,7 +72,7 @@ DATA_EXAMPLE = {
 }
 
 JSON_EXAMPLE = json.dumps(DATA_EXAMPLE)
-JSON_INDENT_EXAMPLE = json.dumps(DATA_EXAMPLE, indent=True)
+JSON_INDENT_EXAMPLE = json.dumps(DATA_EXAMPLE, indent=4)
 
 
 class TestApp(TestCase):
@@ -86,9 +107,61 @@ class TestApp(TestCase):
     def test_json_indent(self):
         dict_input = json.loads(JSON_EXAMPLE)
         cl = Changelog(dict_input)
-        self.assertEqual(JSON_INDENT_EXAMPLE, cl.to_json(indent=True))
+        self.assertEqual(JSON_INDENT_EXAMPLE, cl.to_json(indent=4))
 
     def test_dict(self):
         dict_input = json.loads(JSON_EXAMPLE)
         cl = Changelog(dict_input)
+        self.assertEqual(DATA_EXAMPLE, cl.to_dict())
+
+    @patch("builtins.open", new_callable=mock_open)
+    def test_save(self, mock_function_open):
+        cl = Changelog(DATA_EXAMPLE)
+
+        cl.save()
+
+        mock_function_open.assert_has_calls(
+            [call("./CHANGELOG.md", "w"), call("./changelog.lock", "w")], any_order=True
+        )
+
+        mock_function_open.return_value.write.assert_has_calls(
+            [call(CHANGELOG_EXAMPLE), call(JSON_INDENT_EXAMPLE)]
+        )
+
+    def test_empty_changelog(self):
+        cl = empty_changelog()
+        self.assertEqual(
+            {
+                "repository": "",
+                "versions": [
+                    {
+                        "version": "Unreleased",
+                    }
+                ],
+            },
+            cl.to_dict(),
+        )
+
+    def test_empty_changelog_with_repo(self):
+        cl = empty_changelog(REPO_INPUT)
+        self.assertEqual(
+            {
+                "repository": REPO_INPUT,
+                "versions": [
+                    {
+                        "version": "Unreleased",
+                    }
+                ],
+            },
+            cl.to_dict(),
+        )
+
+    @patch("builtins.open", new_callable=mock_open, read_data=JSON_INDENT_EXAMPLE)
+    @patch("changeloggh.changelog.json")
+    def test_load_changelog(self, mock_json_package, mock_open_function):
+        mock_json_package.load.return_value = DATA_EXAMPLE
+
+        cl = load_changelog()
+
+        mock_json_package.load.assert_called_once_with(mock_open_function.return_value)
         self.assertEqual(DATA_EXAMPLE, cl.to_dict())
