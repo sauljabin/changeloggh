@@ -188,6 +188,77 @@ class TestApp(TestCase):
         }
         self.assertEqual(expected, cl.to_dict()["versions"][0])
 
+    def test_add_change_added_and_initialize_unreleased(self):
+        cl = Changelog(
+            {
+                "repository": REPO_INPUT,
+                "versions": [],
+            }
+        )
+
+        cl.add(ChangeType.Added, "new change")
+
+        expected = {
+            "version": "Unreleased",
+            "changes": [
+                {
+                    "type": "Added",
+                    "list": [
+                        "new change",
+                    ],
+                },
+            ],
+        }
+        self.assertEqual(expected, cl.to_dict()["versions"][0])
+
+    def test_add_change_added_and_initialize_unreleased_if_another_exists(self):
+        cl = Changelog(
+            {
+                "repository": REPO_INPUT,
+                "versions": [
+                    {
+                        "version": "1.0.1",
+                        "changes": [
+                            {
+                                "type": "Added",
+                                "list": [
+                                    "new change",
+                                ],
+                            },
+                        ],
+                    }
+                ],
+            }
+        )
+
+        cl.add(ChangeType.Added, "new change in unreleased")
+
+        expected = [
+            {
+                "version": "Unreleased",
+                "changes": [
+                    {
+                        "type": "Added",
+                        "list": [
+                            "new change in unreleased",
+                        ],
+                    },
+                ],
+            },
+            {
+                "version": "1.0.1",
+                "changes": [
+                    {
+                        "type": "Added",
+                        "list": [
+                            "new change",
+                        ],
+                    },
+                ],
+            },
+        ]
+        self.assertEqual(expected, cl.to_dict()["versions"])
+
     def test_add_and_sort_change_added(self):
         cl = Changelog(copy.deepcopy(DATA_EXAMPLE))
 

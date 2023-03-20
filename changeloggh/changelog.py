@@ -135,19 +135,29 @@ class Changelog:
             file.write(self.to_json(indent=4))
 
     def add(self, change_type: ChangeType, entry: str):
-        unrelease_version = self.data[VERSIONS_KEY][0]
+        if len(self.data[VERSIONS_KEY]) == 0 or (
+            len(self.data[VERSIONS_KEY]) == 1
+            and self.data[VERSIONS_KEY][0].get(VERSION_KEY) != "Unreleased"
+        ):
+            self.data[VERSIONS_KEY].append(
+                {
+                    "version": "Unreleased",
+                }
+            )
+            self.data[VERSIONS_KEY].sort(key=version_comparator())
 
-        if unrelease_version.get(CHANGES_KEY) is None:
-            unrelease_version[CHANGES_KEY] = []
-        changes = unrelease_version[CHANGES_KEY]
+        unreleased_version = self.data[VERSIONS_KEY][0]
+
+        if unreleased_version.get(CHANGES_KEY) is None:
+            unreleased_version[CHANGES_KEY] = []
+        changes = unreleased_version[CHANGES_KEY]
 
         for change in changes:
             inner_change_type = change.get(TYPE_KEY)
             if inner_change_type is not None and inner_change_type == change_type.value:
                 if change.get(LIST_KEY) is None:
                     change[LIST_KEY] = []
-                list = change[LIST_KEY]
-                list.append(entry)
+                change[LIST_KEY].append(entry)
                 break
         else:
             changes.append({TYPE_KEY: change_type.value, LIST_KEY: [entry]})
