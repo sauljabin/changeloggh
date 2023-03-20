@@ -16,3 +16,18 @@ def version_comparator():
             return semver.VersionInfo.parse(a_version).compare(b_version) * -1
 
     return cmp_to_key(compare)
+
+
+def change_comparator():
+    def compare(a, b):
+        a_version = a["type"].lower()
+        b_version = b["type"].lower()
+
+        if a_version < b_version:
+            return -1
+        elif a_version > b_version:
+            return 1
+        else:
+            return 0
+
+    return cmp_to_key(compare)

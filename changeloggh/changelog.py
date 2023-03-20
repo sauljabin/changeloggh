@@ -2,8 +2,15 @@ import json
 
 from jinja2 import Environment
 
+from changeloggh.change_type import ChangeType
 from changeloggh.url_utils import url_join
-from changeloggh.version_utils import version_comparator
+from changeloggh.version_utils import version_comparator, change_comparator
+
+LIST_KEY = "list"
+
+TYPE_KEY = "type"
+
+CHANGES_KEY = "changes"
 
 CHANGELOG_PATH = "./CHANGELOG.md"
 CHANGELOG_LOCK_PATH = "./changelog.lock"
@@ -73,6 +80,10 @@ class Changelog:
 
         self.data[VERSIONS_KEY].sort(key=version_comparator())
 
+        for version in self.data[VERSIONS_KEY]:
+            if version.get(CHANGES_KEY) is not None:
+                version[CHANGES_KEY].sort(key=change_comparator())
+
     def __str__(self):
         return self.to_string()
 
@@ -122,6 +133,26 @@ class Changelog:
 
         with open(CHANGELOG_LOCK_PATH, "w") as file:
             file.write(self.to_json(indent=4))
+
+    def add(self, change_type: ChangeType, entry: str):
+        unrelease_version = self.data[VERSIONS_KEY][0]
+
+        if unrelease_version.get(CHANGES_KEY) is None:
+            unrelease_version[CHANGES_KEY] = []
+        changes = unrelease_version[CHANGES_KEY]
+
+        for change in changes:
+            inner_change_type = change.get(TYPE_KEY)
+            if inner_change_type is not None and inner_change_type == change_type.value:
+                if change.get(LIST_KEY) is None:
+                    change[LIST_KEY] = []
+                list = change[LIST_KEY]
+                list.append(entry)
+                break
+        else:
+            changes.append({TYPE_KEY: change_type.value, LIST_KEY: [entry]})
+
+        changes.sort(key=change_comparator())
 
 
 if __name__ == "__main__":

@@ -1,32 +1,74 @@
 from unittest import TestCase
 
-from changeloggh.changelog import Changelog
+from changeloggh.version_utils import version_comparator, change_comparator
 
 
 class TestApp(TestCase):
     def test_sort_versions(self):
-        input_data = {
-            "repository": "",
-            "versions": [
-                {"version": "0.0.1"},
-                {"version": "Unreleased"},
-                {"version": "1.0.4"},
-                {"version": "2.3.0"},
-                {"version": "1.5.0"},
-                {"version": "1.3.0"},
-            ],
-        }
-        expected_data = {
-            "repository": "",
-            "versions": [
-                {"version": "Unreleased"},
-                {"version": "2.3.0"},
-                {"version": "1.5.0"},
-                {"version": "1.3.0"},
-                {"version": "1.0.4"},
-                {"version": "0.0.1"},
-            ],
-        }
-        cl = Changelog(input_data)
+        data = [
+            {"version": "0.0.1"},
+            {"version": "Unreleased"},
+            {"version": "1.0.4"},
+            {"version": "2.3.0"},
+            {"version": "1.5.0"},
+            {"version": "1.3.0"},
+        ]
 
-        self.assertEqual(expected_data, cl.to_dict())
+        expected_data = [
+            {"version": "Unreleased"},
+            {"version": "2.3.0"},
+            {"version": "1.5.0"},
+            {"version": "1.3.0"},
+            {"version": "1.0.4"},
+            {"version": "0.0.1"},
+        ]
+
+        data.sort(key=version_comparator())
+
+        self.assertEqual(expected_data, data)
+
+    def test_sort_changes(self):
+        data = [
+            {
+                "type": "Fixed",
+            },
+            {
+                "type": "Security",
+            },
+            {
+                "type": "Deprecated",
+            },
+            {
+                "type": "Removed",
+            },
+            {
+                "type": "Added",
+            },
+            {
+                "type": "Changed",
+            },
+        ]
+        expected_data = [
+            {
+                "type": "Added",
+            },
+            {
+                "type": "Changed",
+            },
+            {
+                "type": "Deprecated",
+            },
+            {
+                "type": "Fixed",
+            },
+            {
+                "type": "Removed",
+            },
+            {
+                "type": "Security",
+            },
+        ]
+
+        data.sort(key=change_comparator())
+
+        self.assertEqual(expected_data, data)

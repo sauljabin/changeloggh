@@ -92,7 +92,21 @@ git push --tags
 
 ## Why a lock file?
 
+A lot of tools (like `yarn`, `npm`, `poetry` ,etc) use `lock files` to
+ensures that installations remain identical and reproducible
+across systems. A `lock files` saves important metadata, tha is why
+`changeloggh` is using this approach. The `changelog.lock` file
+saves and structures changelog data in a json format.
+It's highly recommended to commit the `changelog.lock` file into your repository.
 
+## Limitations
+
+- Does not support other format besides `semver` `major.minor.patch`, ex: 1.1.1.
+- It needs a `changelog.lock`.
+
+## Alternatives
+
+- [changelog-cli](https://github.com/mc706/changelog-cli)
 
 # TODO
 

@@ -1,8 +1,10 @@
+import copy
 import json
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch, mock_open, call
 
+from changeloggh.change_type import ChangeType
 from changeloggh.changelog import Changelog, empty_changelog, load_changelog
 
 REPO_INPUT = "https://github.com/sauljabin/changeloggh"
@@ -165,3 +167,199 @@ class TestApp(TestCase):
 
         mock_json_package.load.assert_called_once_with(mock_open_function.return_value)
         self.assertEqual(DATA_EXAMPLE, cl.to_dict())
+
+    def test_add_change_added(self):
+        cl = Changelog(copy.deepcopy(DATA_EXAMPLE))
+
+        cl.add(ChangeType.Added, "new change 1")
+        cl.add(ChangeType.Added, "new change 2")
+
+        expected = {
+            "version": "Unreleased",
+            "changes": [
+                {
+                    "type": "Added",
+                    "list": [
+                        "new change 1",
+                        "new change 2",
+                    ],
+                },
+            ],
+        }
+        self.assertEqual(expected, cl.to_dict()["versions"][0])
+
+    def test_add_and_sort_change_added(self):
+        cl = Changelog(copy.deepcopy(DATA_EXAMPLE))
+
+        cl.add(ChangeType.Security, "new security change 1")
+        cl.add(ChangeType.Added, "new added change")
+        cl.add(ChangeType.Security, "new security change 2")
+
+        expected = {
+            "version": "Unreleased",
+            "changes": [
+                {
+                    "type": "Added",
+                    "list": [
+                        "new added change",
+                    ],
+                },
+                {
+                    "type": "Security",
+                    "list": [
+                        "new security change 1",
+                        "new security change 2",
+                    ],
+                },
+            ],
+        }
+        self.assertEqual(expected, cl.to_dict()["versions"][0])
+
+    def test_sort_versions(self):
+        input_data = {
+            "repository": "",
+            "versions": [
+                {"version": "0.0.1"},
+                {"version": "Unreleased"},
+                {"version": "1.0.4"},
+                {"version": "2.3.0"},
+                {"version": "1.5.0"},
+                {"version": "1.3.0"},
+            ],
+        }
+        expected_data = {
+            "repository": "",
+            "versions": [
+                {"version": "Unreleased"},
+                {"version": "2.3.0"},
+                {"version": "1.5.0"},
+                {"version": "1.3.0"},
+                {"version": "1.0.4"},
+                {"version": "0.0.1"},
+            ],
+        }
+        cl = Changelog(input_data)
+
+        self.assertEqual(expected_data, cl.to_dict())
+
+    def test_sort_changes(self):
+        input_data = {
+            "repository": "",
+            "versions": [
+                {
+                    "version": "Unreleased",
+                    "changes": [
+                        {
+                            "type": "Fixed",
+                        },
+                        {
+                            "type": "Security",
+                        },
+                        {
+                            "type": "Deprecated",
+                        },
+                        {
+                            "type": "Removed",
+                        },
+                        {
+                            "type": "Added",
+                        },
+                        {
+                            "type": "Changed",
+                        },
+                    ],
+                },
+            ],
+        }
+        expected_data = {
+            "repository": "",
+            "versions": [
+                {
+                    "version": "Unreleased",
+                    "changes": [
+                        {"type": "Added", "list": ["test1"]},
+                        {
+                            "type": "Changed",
+                        },
+                        {
+                            "type": "Deprecated",
+                        },
+                        {
+                            "type": "Fixed",
+                        },
+                        {
+                            "type": "Removed",
+                        },
+                        {
+                            "type": "Security",
+                        },
+                    ],
+                },
+            ],
+        }
+        cl = Changelog(input_data)
+
+        cl.add(ChangeType.Added, "test1")
+
+        self.assertEqual(expected_data, cl.to_dict())
+
+    def test_sort_changes_when_creating(self):
+        input_data = {
+            "repository": "",
+            "versions": [
+                {
+                    "version": "Unreleased",
+                    "changes": [
+                        {
+                            "type": "Fixed",
+                        },
+                        {
+                            "type": "Security",
+                        },
+                        {
+                            "type": "Deprecated",
+                        },
+                        {
+                            "type": "Removed",
+                        },
+                        {
+                            "type": "Added",
+                        },
+                        {
+                            "type": "Changed",
+                        },
+                    ],
+                },
+            ],
+        }
+        expected_data = {
+            "repository": "",
+            "versions": [
+                {
+                    "version": "Unreleased",
+                    "changes": [
+                        {
+                            "type": "Added",
+                        },
+                        {
+                            "type": "Changed",
+                        },
+                        {
+                            "type": "Deprecated",
+                        },
+                        {
+                            "type": "Fixed",
+                        },
+                        {
+                            "type": "Removed",
+                        },
+                        {
+                            "type": "Security",
+                        },
+                    ],
+                },
+            ],
+        }
+        cl = Changelog(input_data)
+
+        self.assertEqual(expected_data, cl.to_dict())
