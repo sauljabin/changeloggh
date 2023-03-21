@@ -14,6 +14,7 @@ from changeloggh.changelog import (
     load_changelog,
     ChangeType,
     BumpRule,
+    parse_changelog,
 )
 
 
@@ -219,6 +220,30 @@ def release(version: str):
             " changes."
         )
         exit(1)
+
+
+@main.command("import")
+@click.option(
+    "--force",
+    is_flag=True,
+    default=False,
+    help='Force to override "changelog.lock" file.',
+    show_default=True,
+)
+def import_md(force: bool):
+    """
+    Import a MD file.
+    """
+
+    if not force:
+        path = Path(CHANGELOG_LOCK_PATH)
+        if path.exists():
+            print(f"{CHANGELOG_LOCK_PATH} file already exists. Use --force to override the file.")
+            exit(1)
+
+    cl = parse_changelog()
+    cl.save()
+    print_json(cl.to_json(), indent=4)
 
 
 if __name__ == "__main__":

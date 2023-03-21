@@ -2,7 +2,21 @@
     "repository": "https://github.com/sauljabin/changeloggh",
     "versions": [
         {
-            "version": "Unreleased"
+            "version": "Unreleased",
+            "changes": [
+                {
+                    "type": "Added",
+                    "entries": [
+                        "Add change commands",
+                        "Release command",
+                        "Import command",
+                        "Latest command",
+                        "Print command",
+                        "Init Command",
+                        "Bump command"
+                    ]
+                }
+            ]
         },
         {
             "version": "0.1.0",

@@ -252,3 +252,41 @@ class TestApp(TestCase):
             ),
             result.output.strip(),
         )
+
+    @patch("changeloggh.cli.Path")
+    def test_reject_import_if_lock_file_already_exists(self, mock_class_path):
+        runner = CliRunner()
+        mock_class_path.return_value.exists.return_value = True
+
+        result = runner.invoke(main, ["import"])
+
+        mock_class_path.assert_has_calls([call("./changelog.lock"), call().exists()])
+        self.assertEqual(1, result.exit_code)
+        self.assertEqual(
+            "./changelog.lock file already exists. Use --force to override the file.",
+            result.output.strip(),
+        )
+
+    @patch("changeloggh.cli.parse_changelog")
+    @patch("changeloggh.cli.Path")
+    def test_import_changelog_file(self, mock_class_path, mock_function_parse):
+        mock_class_path.return_value.exists.return_value = False
+        mock_function_parse.return_value.to_json.return_value = "{}"
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["import"])
+
+        mock_function_parse.assert_called_once()
+        mock_function_parse.return_value.save.assert_called_once()
+        self.assertEqual(0, result.exit_code)
+
+    @patch("changeloggh.cli.parse_changelog")
+    def test_force_import_changelog_file(self, mock_function_parse):
+        mock_function_parse.return_value.to_json.return_value = "{}"
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["import", "--force"])
+
+        mock_function_parse.assert_called_with()
+        mock_function_parse.return_value.save.assert_called_once()
+        self.assertEqual(0, result.exit_code)
