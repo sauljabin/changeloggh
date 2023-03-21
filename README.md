@@ -75,6 +75,11 @@ Print CHANGELOG:
 changeloggh print --format <rich|json|text>
 ```
 
+## Screenshots
+
+![](https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/terminal.png)
+
+
 ## Development
 
 Installing poetry:
