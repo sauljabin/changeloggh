@@ -4,7 +4,7 @@ from unittest.mock import patch, call, MagicMock
 from click.testing import CliRunner
 
 from changeloggh import VERSION
-from changeloggh.changelog import Changelog
+from changeloggh.changelog import Changelog, ChangeType
 from changeloggh.cli import main
 from tests.test_changelog import (
     REPO_EXAMPLE,
@@ -29,7 +29,6 @@ class TestApp(TestCase):
         result = runner.invoke(main, ["init", REPO_EXAMPLE])
 
         mock_class_path.assert_has_calls([call("./CHANGELOG.md"), call().exists()])
-        # , call("./changelog.lock"), call().exists()
         self.assertEqual(1, result.exit_code)
         self.assertEqual(
             "./CHANGELOG.md file already exists. Use --force to override the file.",
@@ -112,3 +111,40 @@ class TestApp(TestCase):
         mock_md_class.assert_called_once_with(cl.to_string())
         mock_console_function.return_value.print.assert_called_once_with(mock_md_class.return_value)
         self.assertEqual(0, result.exit_code)
+
+    @patch("changeloggh.cli.load_changelog", new_callable=MagicMock())
+    @patch("changeloggh.cli.Path")
+    def test_add_changes_file(self, mock_class_path, mock_function_load):
+        for change in ["added", "changed", "deprecated", "fixed", "removed", "security"]:
+            mock_class_path.return_value.exists.return_value = True
+            mock_function_load.return_value = MagicMock()
+
+            feature1 = "feature 1"
+            feature2 = "feature 2"
+            runner = CliRunner()
+            result = runner.invoke(main, [change, feature1, feature2])
+
+            mock_function_load.assert_called()
+            mock_function_load.return_value.add.assert_has_calls(
+                [
+                    call(ChangeType[change.capitalize()], feature1),
+                    call(ChangeType[change.capitalize()], feature2),
+                ]
+            )
+            mock_function_load.return_value.save.assert_called_once()
+            self.assertEqual(0, result.exit_code)
+
+    @patch("changeloggh.cli.Path")
+    def test_reject_add_changes_if_file_does_not_exist(self, mock_class_path):
+        for change in ["added", "changed", "deprecated", "fixed", "removed", "security"]:
+            mock_class_path.return_value.exists.return_value = False
+
+            runner = CliRunner()
+            result = runner.invoke(main, [change, "test"])
+
+            mock_class_path.assert_has_calls([call("./changelog.lock"), call().exists()])
+            self.assertEqual(1, result.exit_code)
+            self.assertEqual(
+                './changelog.lock file does not exist. Use "init" command to initialize.',
+                result.output.strip(),
+            )

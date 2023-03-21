@@ -101,7 +101,7 @@ It's highly recommended to commit the `changelog.lock` file into your repository
 
 ## Limitations
 
-- Does not support other format besides `semver` `major.minor.patch`, ex: 1.1.1.
+- Does not support other format besides `semver` `major.minor.patch`, ex.: 1.1.1.
 - It needs a `changelog.lock`.
 
 ## Alternatives
@@ -110,7 +110,8 @@ It's highly recommended to commit the `changelog.lock` file into your repository
 
 # TODO
 
-- add command for adding new change
+- release command
+- current
 - import from md
 - readme
 - bump script

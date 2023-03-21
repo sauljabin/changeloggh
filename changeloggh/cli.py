@@ -1,9 +1,10 @@
 from pathlib import Path
+from typing import List
 
 import click
 from rich import print_json
-from rich.markdown import Markdown
 from rich.console import Console
+from rich.markdown import Markdown
 
 from changeloggh import VERSION
 from changeloggh.changelog import (
@@ -11,6 +12,7 @@ from changeloggh.changelog import (
     CHANGELOG_LOCK_PATH,
     empty_changelog,
     load_changelog,
+    ChangeType,
 )
 
 
@@ -29,13 +31,13 @@ def main():
     show_default=True,
 )
 @click.argument("repository", nargs=1)
-def init(force, repository):
+def init(force: bool, repository: str):
     """
     Initialize a CHANGELOG.md file.
 
     \b
     REPOSITORY  GitHub Repository.
-                (ex: https://github.com/sauljabin/changeloggh).
+                (ex.: https://github.com/sauljabin/changeloggh).
     """
 
     if not force:
@@ -57,7 +59,7 @@ def init(force, repository):
     help="What format to use.",
     show_default=True,
 )
-def print_changelog(format):
+def print_changelog(format: str):
     """
     Print changelog file.
     """
@@ -72,6 +74,101 @@ def print_changelog(format):
             print(cl.to_string())
         case "json":
             print_json(cl.to_json(), indent=4)
+
+
+@main.command("added")
+@click.argument("entries", nargs=-1)
+def added(entries: List[str]):
+    """
+    Add new entries to "Added" change type.
+
+    ex.: changeloggh added "New feature" "New validation added".
+
+    \b
+    ENTRIES  List of entries.
+    """
+    add_entry(ChangeType.Added, entries)
+
+
+@main.command("changed")
+@click.argument("entries", nargs=-1)
+def changed(entries: List[str]):
+    """
+    Add new entries to "Changed" change type.
+
+    ex.: changeloggh changed "Size was changed" "Change auth method".
+
+    \b
+    ENTRIES  List of entries.
+    """
+    add_entry(ChangeType.Changed, entries)
+
+
+@main.command("deprecated")
+@click.argument("entries", nargs=-1)
+def deprecated(entries: List[str]):
+    """
+    Add new entries to "Deprecated" change type.
+
+    ex.: changeloggh deprecated "Option force" "Add method".
+
+    \b
+    ENTRIES  List of entries.
+    """
+    add_entry(ChangeType.Deprecated, entries)
+
+
+@main.command("fixed")
+@click.argument("entries", nargs=-1)
+def fixed(entries: List[str]):
+    """
+    Add new entries to "Fixed" change type.
+
+    ex.: changeloggh fixed "Error when loading" "Fix panel size".
+
+    \b
+    ENTRIES  List of entries.
+    """
+    add_entry(ChangeType.Fixed, entries)
+
+
+@main.command("removed")
+@click.argument("entries", nargs=-1)
+def removed(entries: List[str]):
+    """
+    Add new entries to "Removed" change type.
+
+    ex.: changeloggh removed "Remove unnecessary code" "Remove deprecated function".
+
+    \b
+    ENTRIES  List of entries.
+    """
+    add_entry(ChangeType.Removed, entries)
+
+
+@main.command("security")
+@click.argument("entries", nargs=-1)
+def security(entries: List[str]):
+    """
+    Add new entries to "Security" change type.
+
+    ex.: changeloggh security "Add security patch" "Update dependencies".
+
+    \b
+    ENTRIES  List of entries.
+    """
+    add_entry(ChangeType.Security, entries)
+
+
+def add_entry(change_type, entries):
+    path = Path(CHANGELOG_LOCK_PATH)
+    if not path.exists():
+        print(f'{CHANGELOG_LOCK_PATH} file does not exist. Use "init" command to initialize.')
+        exit(1)
+    cl = load_changelog()
+    for entry in entries:
+        cl.add(change_type, entry)
+    cl.save()
 
 
 if __name__ == "__main__":
