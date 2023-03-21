@@ -4,7 +4,7 @@ from unittest.mock import patch, call, MagicMock
 from click.testing import CliRunner
 
 from changeloggh import VERSION
-from changeloggh.changelog import Changelog, ChangeType, BumpRule
+from changeloggh.changelog import Changelog, ChangeType, BumpRule, Version, Change
 from changeloggh.cli import main
 from tests.test_changelog import (
     REPO_EXAMPLE,
@@ -161,17 +161,94 @@ class TestApp(TestCase):
         self.assertEqual("1.0.1", result.output.strip())
 
     @patch("changeloggh.cli.load_changelog")
-    def test_release_command(self, mock_function_load):
+    def test_bump_command(self, mock_function_load):
         for rule, version in [("major", "2.0.0"), ("minor", "1.1.0"), ("patch", "1.0.2")]:
             mock_function_load.return_value = MagicMock()
-            mock_function_load.return_value.release.return_value = version
+            mock_function_load.return_value.bump.return_value = version
 
             runner = CliRunner()
-            result = runner.invoke(main, ["release", rule])
+            result = runner.invoke(main, ["bump", rule])
 
             mock_function_load.assert_called()
-            mock_function_load.return_value.release.assert_called_with(BumpRule[rule])
+            mock_function_load.return_value.bump.assert_called_with(BumpRule[rule])
             mock_function_load.return_value.save.assert_called_once()
 
             self.assertEqual(0, result.exit_code)
             self.assertEqual(version, result.output.strip())
+
+    @patch("changeloggh.cli.load_changelog")
+    def test_raise_error_in_bump_command_when_cl_is_empty(self, mock_function_load):
+        rule = "major"
+        mock_function_load.return_value = Changelog()
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["bump", rule])
+
+        mock_function_load.assert_called()
+        self.assertEqual(1, result.exit_code)
+        self.assertEqual(
+            (
+                "There are not available versions. Use"
+                " {added|changed|deprecated|removed|fixed|security} commands to add changes."
+            ),
+            result.output.strip(),
+        )
+
+    @patch("changeloggh.cli.load_changelog")
+    def test_release_command(self, mock_function_load):
+        version = "1.0.2"
+        mock_function_load.return_value = MagicMock()
+        mock_function_load.return_value.release.return_value = version
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["release", version])
+
+        mock_function_load.assert_called()
+        mock_function_load.return_value.release.assert_called_with(version)
+        mock_function_load.return_value.save.assert_called_once()
+
+        self.assertEqual(0, result.exit_code)
+        self.assertEqual(version, result.output.strip())
+
+    @patch("changeloggh.cli.load_changelog")
+    def test_raise_error_in_release_command_when_cl_is_empty(self, mock_function_load):
+        version = "1.0.1"
+        mock_function_load.return_value = Changelog()
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["release", version])
+
+        mock_function_load.assert_called()
+        self.assertEqual(1, result.exit_code)
+        self.assertEqual(
+            (
+                "There are not available versions. Use"
+                " {added|changed|deprecated|removed|fixed|security} commands to add changes."
+            ),
+            result.output.strip(),
+        )
+
+    @patch("changeloggh.cli.load_changelog")
+    def test_raise_error_in_release_command_when_version_is_invalid(self, mock_function_load):
+        version = "random"
+        mock_function_load.return_value = Changelog(
+            versions=[
+                Version(
+                    version="Unreleased",
+                    changes=[Change(change_type="Added", entries=["Initial"])],
+                )
+            ]
+        )
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["release", version])
+
+        mock_function_load.assert_called()
+        self.assertEqual(1, result.exit_code)
+        self.assertEqual(
+            (
+                "random is not valid SemVer string. Use"
+                " {added|changed|deprecated|removed|fixed|security} commands to add changes."
+            ),
+            result.output.strip(),
+        )

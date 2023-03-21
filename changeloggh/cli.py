@@ -181,18 +181,44 @@ def latest():
     print(cl.latest())
 
 
-@main.command("release")
+@main.command("bump")
 @click.argument(
     "rule", type=click.Choice(["major", "minor", "patch"], case_sensitive=False), nargs=1
 )
-def release(rule: str):
+def bump(rule: str):
     """
-    Release a new version.
+    Bump to a next version.
     """
+    try:
+        cl = load_changelog()
+        new_version = cl.bump(BumpRule[rule])
+        cl.save()
+        print(new_version)
+    except Exception as ex:
+        print(
+            f"{str(ex)}. Use {{added|changed|deprecated|removed|fixed|security}} commands to add"
+            " changes."
+        )
+        exit(1)
 
-    cl = load_changelog()
-    print(cl.release(BumpRule[rule]))
-    cl.save()
+
+@main.command("release")
+@click.argument("version", nargs=1)
+def release(version: str):
+    """
+    Release a specific version.
+    """
+    try:
+        cl = load_changelog()
+        new_version = cl.release(version)
+        cl.save()
+        print(new_version)
+    except Exception as ex:
+        print(
+            f"{str(ex)}. Use {{added|changed|deprecated|removed|fixed|security}} commands to add"
+            " changes."
+        )
+        exit(1)
 
 
 if __name__ == "__main__":

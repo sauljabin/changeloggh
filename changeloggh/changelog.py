@@ -224,15 +224,16 @@ class Changelog:
 
         return self.versions[1].version
 
-    def release(self, rule: BumpRule):
+    def bump(self, rule: BumpRule):
         if not self.versions:
-            raise Exception("There are not available versions.")
+            raise Exception("There are not available versions")
+
         if (
             not self.versions[0].changes
             or not self.versions[0].version
             or self.versions[0].version != "Unreleased"
         ):
-            raise Exception("There are not available changes.")
+            raise Exception("There are not available changes")
 
         semver = VersionInfo.parse(self.latest())
 
@@ -248,6 +249,27 @@ class Changelog:
         self.versions[0].changes = None
         self.versions.sort(key=version_comparator())
 
+        return str(semver)
+
+    def release(self, version: str):
+        if not self.versions:
+            raise Exception("There are not available versions")
+
+        if (
+            not self.versions[0].changes
+            or not self.versions[0].version
+            or self.versions[0].version != "Unreleased"
+        ):
+            raise Exception("There are not available changes")
+
+        for inner_version in self.versions:
+            if inner_version.version == version:
+                raise Exception(f"Version {version} exists already")
+
+        semver = VersionInfo.parse(version)
+        self.versions.append(Version(str(semver), str(date.today()), self.versions[0].changes))
+        self.versions[0].changes = None
+        self.versions.sort(key=version_comparator())
         return str(semver)
 
 

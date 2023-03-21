@@ -375,30 +375,30 @@ class TestApp(TestCase):
     def test_raise_error_if_there_are_not_versions(self):
         with self.assertRaises(Exception) as context:
             cl = Changelog(versions=[])
-            cl.release(BumpRule.patch)
+            cl.bump(BumpRule.patch)
 
-        self.assertEqual("There are not available versions.", str(context.exception))
+        self.assertEqual("There are not available versions", str(context.exception))
 
     def test_raise_error_if_there_are_not_changes(self):
         with self.assertRaises(Exception) as context:
             cl = Changelog(versions=[Version("Unreleased")])
-            cl.release(BumpRule.patch)
+            cl.bump(BumpRule.patch)
 
-        self.assertEqual("There are not available changes.", str(context.exception))
+        self.assertEqual("There are not available changes", str(context.exception))
 
     def test_raise_error_if_there_is_not_unreleased(self):
         with self.assertRaises(Exception) as context:
             cl = Changelog(versions=[Version("0.0.1", changes=[Change()])])
-            cl.release(BumpRule.patch)
+            cl.bump(BumpRule.patch)
 
-        self.assertEqual("There are not available changes.", str(context.exception))
+        self.assertEqual("There are not available changes", str(context.exception))
 
     def test_raise_error_if_version_is_none(self):
         with self.assertRaises(Exception) as context:
             cl = Changelog(versions=[Version(changes=[Change()])])
-            cl.release(BumpRule.patch)
+            cl.bump(BumpRule.patch)
 
-        self.assertEqual("There are not available changes.", str(context.exception))
+        self.assertEqual("There are not available changes", str(context.exception))
 
     def test_get_version_zero_if_no_versions(self):
         cl = Changelog(versions=[])
@@ -443,7 +443,7 @@ class TestApp(TestCase):
                 ]
             )
 
-            cl.release(BumpRule[rule])
+            cl.bump(BumpRule[rule])
 
             self.assertEqual(expected_data, cl.to_dict())
 
@@ -484,6 +484,110 @@ class TestApp(TestCase):
                 ]
             )
 
-            cl.release(BumpRule[rule])
+            cl.bump(BumpRule[rule])
 
             self.assertEqual(expected_data, cl.to_dict())
+
+    def test_raise_error_if_there_are_not_versions_on_release(self):
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(versions=[])
+            cl.release("")
+
+        self.assertEqual("There are not available versions", str(context.exception))
+
+    def test_raise_error_if_there_are_not_changes_on_release(self):
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(versions=[Version("Unreleased")])
+            cl.release("")
+
+        self.assertEqual("There are not available changes", str(context.exception))
+
+    def test_raise_error_if_there_is_not_unreleased_on_release(self):
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(versions=[Version("0.0.1", changes=[Change()])])
+            cl.release("")
+
+        self.assertEqual("There are not available changes", str(context.exception))
+
+    def test_raise_error_if_version_is_none_on_release(self):
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(versions=[Version(changes=[Change()])])
+            cl.release("")
+
+        self.assertEqual("There are not available changes", str(context.exception))
+
+    def test_raise_error_if_version_is_not_allowed_release(self):
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(
+                versions=[
+                    Version(
+                        version="Unreleased",
+                        changes=[Change(change_type="Added", entries=["Test"])],
+                    ),
+                ]
+            )
+            cl.release("random")
+
+        self.assertEqual("random is not valid SemVer string", str(context.exception))
+
+    def test_release_version_whit_with_previous_version(self):
+        version = "2.1.3"
+        expected_data = {
+            "versions": [
+                {
+                    "version": "Unreleased",
+                },
+                {
+                    "version": version,
+                    "date": str(date.today()),
+                    "changes": [
+                        {"type": "Added", "entries": ["Test"]},
+                    ],
+                },
+                {
+                    "version": "1.0.0",
+                    "date": str(date.today()),
+                    "changes": [
+                        {"type": "Added", "entries": ["Initial"]},
+                    ],
+                },
+            ],
+        }
+        cl = Changelog(
+            versions=[
+                Version(
+                    version="Unreleased",
+                    changes=[Change(change_type="Added", entries=["Test"])],
+                ),
+                Version(
+                    version="1.0.0",
+                    release_date=str(date.today()),
+                    changes=[Change(change_type="Added", entries=["Initial"])],
+                ),
+            ]
+        )
+
+        cl.release(version)
+
+        self.assertEqual(expected_data, cl.to_dict())
+
+    def test_raise_error_if_release_version_exists_already(self):
+        version = "1.0.0"
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(
+                versions=[
+                    Version(
+                        version="Unreleased",
+                        changes=[Change(change_type="Added", entries=["Test"])],
+                    ),
+                    Version(
+                        version="1.0.0",
+                        release_date=str(date.today()),
+                        changes=[Change(change_type="Added", entries=["Initial"])],
+                    ),
+                ]
+            )
+
+            cl.release(version)
+
+        self.assertEqual("Version 1.0.0 exists already", str(context.exception))
