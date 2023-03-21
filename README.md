@@ -40,6 +40,41 @@ Version:
 changeloggh --version
 ```
 
+Init CHANGELOG:
+```shell
+changeloggh init <GitHub Repo>
+```
+
+Add changes:
+```sh
+changeloggh <added|changed|deprecated|removed|fixed|security> "entry 1" "entry 2" ...
+```
+
+Bump version:
+```shell
+changeloggh bump <major|minor|patch>
+```
+
+Release version:
+```shell
+changeloggh release <version>
+```
+
+Import MD:
+```shell
+changeloggh import
+```
+
+Print current version:
+```shell
+changeloggh latest
+```
+
+Print CHANGELOG:
+```shell
+changeloggh print --format <rich|json|text>
+```
+
 ## Development
 
 Installing poetry:
@@ -82,12 +117,8 @@ poetry run changeloggh
 > Check https://python-poetry.org/docs/cli/#version
 
 ```shell
-poetry version <major|minor|patch>
-git add -A
-git commit -m "bumping version to $(poetry version -s)"
-git tag $(poetry version -s)
-git push origin main
-git push --tags
+poetry run python -m scripts.bump --help
+poetry run python -m scripts.bump <major|minor|patch>
 ```
 
 ## Why a lock file?
@@ -107,8 +138,3 @@ It's highly recommended to commit the `changelog.lock` file into your repository
 ## Alternatives
 
 - [changelog-cli](https://github.com/mc706/changelog-cli)
-
-# TODO
-
-- readme
-- bump script
