@@ -1,15 +1,20 @@
 import copy
 import json
-from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch, mock_open, call
 
-from changeloggh.change_type import ChangeType
-from changeloggh.changelog import Changelog, empty_changelog, load_changelog
+from changeloggh.changelog import (
+    Change,
+    Changelog,
+    Version,
+    empty_changelog,
+    load_changelog,
+    ChangeType,
+)
 
-REPO_INPUT = "https://github.com/sauljabin/changeloggh"
+REPO_EXAMPLE = "https://github.com/sauljabin/changeloggh"
 
-CHANGELOG_HEADER = """
+CHANGELOG_HEADER_EXAMPLE = """
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -19,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 """.strip()
 
 CHANGELOG_EXAMPLE = f"""
-{CHANGELOG_HEADER}
+{CHANGELOG_HEADER_EXAMPLE}
 
 ## [Unreleased]
 
@@ -40,8 +45,14 @@ CHANGELOG_EXAMPLE = f"""
 [0.0.1]: https://github.com/sauljabin/changeloggh/releases/tag/v0.0.1
 """.strip()
 
-DATA_EXAMPLE = {
-    "repository": REPO_INPUT,
+VERSIONS_EXAMPLE = [
+    Version("Unreleased"),
+    Version("1.0.1", "2023-03-17", [Change("Added", ["Tests"])]),
+    Version("0.0.1", "2023-03-17", [Change("Added", ["Initial setup"])]),
+]
+
+DICT_EXAMPLE = {
+    "repository": REPO_EXAMPLE,
     "versions": [
         {
             "version": "Unreleased",
@@ -52,7 +63,7 @@ DATA_EXAMPLE = {
             "changes": [
                 {
                     "type": "Added",
-                    "list": [
+                    "entries": [
                         "Tests",
                     ],
                 },
@@ -64,7 +75,7 @@ DATA_EXAMPLE = {
             "changes": [
                 {
                     "type": "Added",
-                    "list": [
+                    "entries": [
                         "Initial setup",
                     ],
                 },
@@ -73,52 +84,38 @@ DATA_EXAMPLE = {
     ],
 }
 
-JSON_EXAMPLE = json.dumps(DATA_EXAMPLE)
-JSON_INDENT_EXAMPLE = json.dumps(DATA_EXAMPLE, indent=4)
+JSON_EXAMPLE = json.dumps(DICT_EXAMPLE)
+JSON_INDENT_EXAMPLE = json.dumps(DICT_EXAMPLE, indent=4)
 
 
 class TestApp(TestCase):
-    def test_raise_error_if_not_dict(self):
-        inputs = ["path", Path()]
-        for invalid_input in inputs:
-            with self.assertRaises(TypeError) as context:
-                Changelog(invalid_input)
-
-            self.assertIsInstance(context.exception, TypeError)
-            self.assertEqual("Argument must be dictionary.", str(context.exception))
-
-    def test_do_not_raise_error_if_input_is_dict(self):
-        Changelog({})
+    maxDiff = None
 
     def test_string(self):
-        dict_input = json.loads(JSON_EXAMPLE)
-        cl = Changelog(dict_input)
+        cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
         self.assertEqual(CHANGELOG_EXAMPLE, str(cl))
         self.assertEqual(CHANGELOG_EXAMPLE, cl.to_string())
 
     def test_string_only_header(self):
-        cl = Changelog({})
-        self.assertEqual(CHANGELOG_HEADER, str(cl))
-        self.assertEqual(CHANGELOG_HEADER, cl.to_string())
+        cl = Changelog()
+        self.assertEqual(CHANGELOG_HEADER_EXAMPLE, str(cl))
+        self.assertEqual(CHANGELOG_HEADER_EXAMPLE, cl.to_string())
 
     def test_json(self):
-        dict_input = json.loads(JSON_EXAMPLE)
-        cl = Changelog(dict_input)
+        cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
         self.assertEqual(JSON_EXAMPLE, cl.to_json())
 
     def test_json_indent(self):
-        dict_input = json.loads(JSON_EXAMPLE)
-        cl = Changelog(dict_input)
+        cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
         self.assertEqual(JSON_INDENT_EXAMPLE, cl.to_json(indent=4))
 
     def test_dict(self):
-        dict_input = json.loads(JSON_EXAMPLE)
-        cl = Changelog(dict_input)
-        self.assertEqual(DATA_EXAMPLE, cl.to_dict())
+        cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
+        self.assertEqual(DICT_EXAMPLE, cl.to_dict())
 
     @patch("builtins.open", new_callable=mock_open)
     def test_save(self, mock_function_open):
-        cl = Changelog(DATA_EXAMPLE)
+        cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
 
         cl.save()
 
@@ -134,7 +131,6 @@ class TestApp(TestCase):
         cl = empty_changelog()
         self.assertEqual(
             {
-                "repository": "",
                 "versions": [
                     {
                         "version": "Unreleased",
@@ -145,10 +141,10 @@ class TestApp(TestCase):
         )
 
     def test_empty_changelog_with_repo(self):
-        cl = empty_changelog(REPO_INPUT)
+        cl = empty_changelog(REPO_EXAMPLE)
         self.assertEqual(
             {
-                "repository": REPO_INPUT,
+                "repository": REPO_EXAMPLE,
                 "versions": [
                     {
                         "version": "Unreleased",
@@ -159,17 +155,12 @@ class TestApp(TestCase):
         )
 
     @patch("builtins.open", new_callable=mock_open, read_data=JSON_INDENT_EXAMPLE)
-    @patch("changeloggh.changelog.json")
-    def test_load_changelog(self, mock_json_package, mock_open_function):
-        mock_json_package.load.return_value = DATA_EXAMPLE
-
+    def test_load_changelog(self, mock_open_function):
         cl = load_changelog()
-
-        mock_json_package.load.assert_called_once_with(mock_open_function.return_value)
-        self.assertEqual(DATA_EXAMPLE, cl.to_dict())
+        self.assertEqual(DICT_EXAMPLE, cl.to_dict())
 
     def test_add_change_added(self):
-        cl = Changelog(copy.deepcopy(DATA_EXAMPLE))
+        cl = Changelog(versions=copy.deepcopy(VERSIONS_EXAMPLE))
 
         cl.add(ChangeType.Added, "new change 1")
         cl.add(ChangeType.Added, "new change 2")
@@ -179,7 +170,7 @@ class TestApp(TestCase):
             "changes": [
                 {
                     "type": "Added",
-                    "list": [
+                    "entries": [
                         "new change 1",
                         "new change 2",
                     ],
@@ -189,12 +180,7 @@ class TestApp(TestCase):
         self.assertEqual(expected, cl.to_dict()["versions"][0])
 
     def test_add_change_added_and_initialize_unreleased(self):
-        cl = Changelog(
-            {
-                "repository": REPO_INPUT,
-                "versions": [],
-            }
-        )
+        cl = Changelog(repository=REPO_EXAMPLE, versions=[])
 
         cl.add(ChangeType.Added, "new change")
 
@@ -203,7 +189,7 @@ class TestApp(TestCase):
             "changes": [
                 {
                     "type": "Added",
-                    "list": [
+                    "entries": [
                         "new change",
                     ],
                 },
@@ -213,22 +199,8 @@ class TestApp(TestCase):
 
     def test_add_change_added_and_initialize_unreleased_if_another_exists(self):
         cl = Changelog(
-            {
-                "repository": REPO_INPUT,
-                "versions": [
-                    {
-                        "version": "1.0.1",
-                        "changes": [
-                            {
-                                "type": "Added",
-                                "list": [
-                                    "new change",
-                                ],
-                            },
-                        ],
-                    }
-                ],
-            }
+            repository=REPO_EXAMPLE,
+            versions=[Version("1.0.1", changes=[Change("Added", ["new change"])])],
         )
 
         cl.add(ChangeType.Added, "new change in unreleased")
@@ -239,7 +211,7 @@ class TestApp(TestCase):
                 "changes": [
                     {
                         "type": "Added",
-                        "list": [
+                        "entries": [
                             "new change in unreleased",
                         ],
                     },
@@ -250,7 +222,7 @@ class TestApp(TestCase):
                 "changes": [
                     {
                         "type": "Added",
-                        "list": [
+                        "entries": [
                             "new change",
                         ],
                     },
@@ -260,7 +232,7 @@ class TestApp(TestCase):
         self.assertEqual(expected, cl.to_dict()["versions"])
 
     def test_add_and_sort_change_added(self):
-        cl = Changelog(copy.deepcopy(DATA_EXAMPLE))
+        cl = Changelog(versions=copy.deepcopy(VERSIONS_EXAMPLE))
 
         cl.add(ChangeType.Security, "new security change 1")
         cl.add(ChangeType.Added, "new added change")
@@ -271,13 +243,13 @@ class TestApp(TestCase):
             "changes": [
                 {
                     "type": "Added",
-                    "list": [
+                    "entries": [
                         "new added change",
                     ],
                 },
                 {
                     "type": "Security",
-                    "list": [
+                    "entries": [
                         "new security change 1",
                         "new security change 2",
                     ],
@@ -287,68 +259,49 @@ class TestApp(TestCase):
         self.assertEqual(expected, cl.to_dict()["versions"][0])
 
     def test_sort_versions(self):
-        input_data = {
-            "repository": "",
-            "versions": [
-                {"version": "0.0.1"},
-                {"version": "Unreleased"},
-                {"version": "1.0.4"},
-                {"version": "2.3.0"},
-                {"version": "1.5.0"},
-                {"version": "1.3.0"},
-            ],
-        }
+        data = [
+            Version("1.0.4"),
+            Version("0.0.1"),
+            Version("1.5.4"),
+            Version("Unreleased"),
+            Version("2.3.0"),
+            Version("1.3.0"),
+        ]
+
         expected_data = {
-            "repository": "",
             "versions": [
                 {"version": "Unreleased"},
                 {"version": "2.3.0"},
-                {"version": "1.5.0"},
+                {"version": "1.5.4"},
                 {"version": "1.3.0"},
                 {"version": "1.0.4"},
                 {"version": "0.0.1"},
             ],
         }
-        cl = Changelog(input_data)
+        cl = Changelog(versions=data)
 
         self.assertEqual(expected_data, cl.to_dict())
 
     def test_sort_changes(self):
-        input_data = {
-            "repository": "",
-            "versions": [
-                {
-                    "version": "Unreleased",
-                    "changes": [
-                        {
-                            "type": "Fixed",
-                        },
-                        {
-                            "type": "Security",
-                        },
-                        {
-                            "type": "Deprecated",
-                        },
-                        {
-                            "type": "Removed",
-                        },
-                        {
-                            "type": "Added",
-                        },
-                        {
-                            "type": "Changed",
-                        },
-                    ],
-                },
-            ],
-        }
+        input_data = [
+            Version(
+                "Unreleased",
+                changes=[
+                    Change("Fixed"),
+                    Change("Security"),
+                    Change("Deprecated"),
+                    Change("Removed"),
+                    Change("Added"),
+                    Change("Changed"),
+                ],
+            )
+        ]
         expected_data = {
-            "repository": "",
             "versions": [
                 {
                     "version": "Unreleased",
                     "changes": [
-                        {"type": "Added", "list": ["test1"]},
+                        {"type": "Added", "entries": ["test1"]},
                         {
                             "type": "Changed",
                         },
@@ -368,46 +321,28 @@ class TestApp(TestCase):
                 },
             ],
         }
-        cl = Changelog(input_data)
+        cl = Changelog(versions=input_data)
 
         cl.add(ChangeType.Added, "test1")
 
         self.assertEqual(expected_data, cl.to_dict())
 
     def test_sort_changes_when_creating(self):
-        input_data = {
-            "repository": "",
-            "versions": [
-                {
-                    "version": "Unreleased",
-                    "changes": [
-                        {
-                            "type": "Fixed",
-                        },
-                        {
-                            "type": "Security",
-                        },
-                        {
-                            "type": "Deprecated",
-                        },
-                        {
-                            "type": "Removed",
-                        },
-                        {
-                            "type": "Added",
-                        },
-                        {
-                            "type": "Changed",
-                        },
-                    ],
-                },
-            ],
-        }
+        input_data = [
+            Version(
+                changes=[
+                    Change("Fixed"),
+                    Change("Security"),
+                    Change("Deprecated"),
+                    Change("Removed"),
+                    Change("Added"),
+                    Change("Changed"),
+                ]
+            )
+        ]
         expected_data = {
-            "repository": "",
             "versions": [
                 {
-                    "version": "Unreleased",
                     "changes": [
                         {
                             "type": "Added",
@@ -431,6 +366,6 @@ class TestApp(TestCase):
                 },
             ],
         }
-        cl = Changelog(input_data)
+        cl = Changelog(versions=input_data)
 
         self.assertEqual(expected_data, cl.to_dict())

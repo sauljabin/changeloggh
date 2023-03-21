@@ -1,28 +1,17 @@
 import json
 
+from enum import Enum
+from typing import List, Any
+
 from jinja2 import Environment
 
-from changeloggh.change_type import ChangeType
+
 from changeloggh.url_utils import url_join
 from changeloggh.version_utils import version_comparator, change_comparator
 
-LIST_KEY = "list"
-
-TYPE_KEY = "type"
-
-CHANGES_KEY = "changes"
 
 CHANGELOG_PATH = "./CHANGELOG.md"
 CHANGELOG_LOCK_PATH = "./changelog.lock"
-
-LINK_KEY = "link"
-
-VERSION_KEY = "version"
-
-REPOSITORY_KEY = "repository"
-
-VERSIONS_KEY = "versions"
-
 JINJA_TEMPLATE = """
 # Changelog
 
@@ -30,102 +19,153 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-{% for version in versions %}
-## [{{version.version.capitalize()}}]{% if version.date %} - {{version.date}}{% endif %}
-{% for change in version.changes %}
-### {{change.type.capitalize()}}
-{% for item in change.list %}
+{% if versions %}{% for version in versions %}
+## {{version}}
+{% if version.changes %}{% for change in version.changes %}
+### {{change}}
+{% if change.entries %}{% for item in change.entries %}
 - {{item}}
-{% endfor %}{% endfor %}{% endfor %}
-{% for link in links %}[{{link.version.capitalize()}}]: {{link.link}}
+{% endfor %}{% endif %}{% endfor %}{% endif %}{% endfor %}{% endif %}
+{% for link in links %}{{link}}
 {% endfor %}
 """
 
 
-def parse_changelog():
-    pass
+class Link:
+    def __init__(self, version: str = "", repository: str = "", path: str = ""):
+        self.version = version
+        self.repository = repository
+        self.path = path
+
+    def url(self):
+        return url_join([self.repository, self.path])
+
+    def __str__(self):
+        return self.to_str()
+
+    def to_str(self):
+        return f"[{self.version.capitalize().strip()}]: {self.url()}"
 
 
-def load_changelog():
-    with open(CHANGELOG_LOCK_PATH, "r") as content:
-        input_data = json.load(content)
-    return Changelog(input_data)
+class ChangeType(Enum):
+    Added = "Added"
+    Changed = "Changed"
+    Deprecated = "Deprecated"
+    Fixed = "Fixed"
+    Removed = "Removed"
+    Security = "Security"
 
 
-def empty_changelog(repository=""):
-    return Changelog(
-        {
-            "repository": repository,
-            "versions": [
-                {
-                    "version": "Unreleased",
-                }
-            ],
-        }
-    )
+class Change:
+    def __init__(self, change_type: str = "", entries: List[str] | None = None):
+        self.change_type = change_type
+        self.entries = entries
+
+    def __eq__(self, other):
+        return self.change_type == other.change_type
+
+    def to_dict(self):
+        change_dict = {}
+        if self.change_type:
+            change_dict["type"] = self.change_type
+        if self.entries:
+            change_dict["entries"] = self.entries
+        return change_dict
+
+    def __str__(self):
+        return self.to_string()
+
+    def to_string(self):
+        if self.change_type:
+            return f"{self.change_type.capitalize().strip()}"
+        else:
+            return None
+
+
+class Version:
+    def __init__(
+        self,
+        version: str = "",
+        release_date: str | None = None,
+        changes: List[Change] | None = None,
+    ):
+        self.release_date = release_date
+        self.changes = changes
+        self.version = version
+
+        if self.changes:
+            self.changes.sort(key=change_comparator())
+
+    def __eq__(self, other):
+        return self.version == other.version
+
+    def to_dict(self):
+        version_dict = {}
+        if self.version:
+            version_dict["version"] = self.version
+        if self.release_date:
+            version_dict["date"] = self.release_date
+        if self.changes:
+            version_dict["changes"] = [change.to_dict() for change in self.changes]
+        return version_dict
+
+    def __str__(self):
+        return self.to_string()
+
+    def to_string(self):
+        if self.version:
+            return (
+                f"[{self.version.capitalize().strip()}] - {self.release_date}"
+                if self.release_date
+                else f"[{self.version.capitalize().strip()}]"
+            )
+        else:
+            return None
 
 
 class Changelog:
-    def __init__(self, data):
-        if not isinstance(data, dict):
-            raise TypeError("Argument must be dictionary.")
+    def __init__(self, repository: str = "", versions: List[Version] | None = None):
+        self.repository = repository
+        self.versions = versions
 
-        self.data = data
-
-        if self.data.get(VERSIONS_KEY) is None:
-            self.data[VERSIONS_KEY] = []
-
-        if self.data.get(REPOSITORY_KEY) is None:
-            self.data[REPOSITORY_KEY] = ""
-
-        self.data[VERSIONS_KEY].sort(key=version_comparator())
-
-        for version in self.data[VERSIONS_KEY]:
-            if version.get(CHANGES_KEY) is not None:
-                version[CHANGES_KEY].sort(key=change_comparator())
+        if self.versions:
+            self.versions.sort(key=version_comparator())
 
     def __str__(self):
         return self.to_string()
 
     def to_string(self):
         links = []
-        versions = self.data[VERSIONS_KEY]
-        repository = self.data[REPOSITORY_KEY]
 
-        if len(versions) > 1 and repository:
-            for index, version in enumerate(versions[:-1]):
-                previous_tag = f"v{versions[index + 1][VERSION_KEY]}"
-                current_tag = f"v{version[VERSION_KEY]}"
+        if self.versions and len(self.versions) > 1 and self.repository:
+            for index, version in enumerate(self.versions[:-1]):
+                previous_tag = f"v{self.versions[index + 1].version}"
+                current_tag = f"v{version.version}"
 
                 if index == 0:
                     current_tag = "HEAD"
 
                 links.append(
-                    {
-                        VERSION_KEY: version[VERSION_KEY],
-                        LINK_KEY: url_join(
-                            [repository, f"/compare/{previous_tag}...{current_tag}"]
-                        ),
-                    }
+                    Link(
+                        version.version, self.repository, f"/compare/{previous_tag}...{current_tag}"
+                    )
                 )
 
-            version = versions[-1][VERSION_KEY]
+            first_version = self.versions[-1]
             links.append(
-                {
-                    VERSION_KEY: version,
-                    LINK_KEY: url_join([repository, f"/releases/tag/v{version}"]),
-                }
+                Link(
+                    first_version.version,
+                    self.repository,
+                    f"/releases/tag/v{first_version.version}",
+                )
             )
 
         env = Environment()
         template = env.from_string(JINJA_TEMPLATE)
-        return template.render(versions=versions, links=links).strip()
-
-    def to_dict(self):
-        return self.data
+        return template.render(versions=self.versions, links=links).strip()
 
     def to_json(self, indent: int = None):
-        return json.dumps(self.data, indent=indent)
+        return json.dumps(self.to_dict(), indent=indent)
 
     def save(self):
         with open(CHANGELOG_PATH, "w") as file:
@@ -135,58 +175,73 @@ class Changelog:
             file.write(self.to_json(indent=4))
 
     def add(self, change_type: ChangeType, entry: str):
-        if len(self.data[VERSIONS_KEY]) == 0 or (
-            len(self.data[VERSIONS_KEY]) == 1
-            and self.data[VERSIONS_KEY][0].get(VERSION_KEY) != "Unreleased"
+        if self.versions is None:
+            self.versions = []
+
+        if len(self.versions) == 0 or (
+            len(self.versions) == 1 and self.versions[0].version != "Unreleased"
         ):
-            self.data[VERSIONS_KEY].append(
-                {
-                    "version": "Unreleased",
-                }
-            )
-            self.data[VERSIONS_KEY].sort(key=version_comparator())
+            self.versions.append(Version("Unreleased"))
+            self.versions.sort(key=version_comparator())
 
-        unreleased_version = self.data[VERSIONS_KEY][0]
+        unreleased_version = self.versions[0]
 
-        if unreleased_version.get(CHANGES_KEY) is None:
-            unreleased_version[CHANGES_KEY] = []
-        changes = unreleased_version[CHANGES_KEY]
+        if unreleased_version.changes is None:
+            unreleased_version.changes = []
 
-        for change in changes:
-            inner_change_type = change.get(TYPE_KEY)
-            if inner_change_type is not None and inner_change_type == change_type.value:
-                if change.get(LIST_KEY) is None:
-                    change[LIST_KEY] = []
-                change[LIST_KEY].append(entry)
+        for change in unreleased_version.changes:
+            if change.change_type is not None and change.change_type == change_type.value:
+                if change.entries is None:
+                    change.entries = []
+                change.entries.append(entry)
                 break
         else:
-            changes.append({TYPE_KEY: change_type.value, LIST_KEY: [entry]})
+            unreleased_version.changes.append(Change(change_type.value, [entry]))
 
-        changes.sort(key=change_comparator())
+        unreleased_version.changes.sort(key=change_comparator())
+
+    def to_dict(self):
+        changelog_dict = {}
+        if self.repository:
+            changelog_dict["repository"] = self.repository
+        if self.versions:
+            changelog_dict["versions"] = [version.to_dict() for version in self.versions]
+        return changelog_dict
+
+
+def load_changelog() -> Changelog:
+    def json_to_changelog(obj: dict[Any, Any]):
+        if "type" in obj:
+            return Change(change_type=obj["type"], entries=obj.get("entries"))
+        if "version" in obj:
+            return Version(
+                version=obj["version"], release_date=obj.get("date"), changes=obj.get("changes")
+            )
+        if "repository" in obj:
+            return Changelog(repository=obj["repository"], versions=obj.get("versions"))
+        return obj
+
+    with open(CHANGELOG_LOCK_PATH, "r") as content:
+        changelog = json.load(content, object_hook=json_to_changelog)
+
+    return changelog
+
+
+def empty_changelog(repository=""):
+    return Changelog(repository=repository, versions=[Version(version="Unreleased")])
+
+
+def parse_changelog():
+    pass
 
 
 if __name__ == "__main__":
-    data = {
-        "repository": "https://github.com/sauljabin/changeloggh",
-        "versions": [
-            {
-                "version": "Unreleased",
-            },
-            {
-                "version": "0.0.1",
-                "date": "2023-03-17",
-                "changes": [
-                    {
-                        "type": "Added",
-                        "list": [
-                            "Initial setup",
-                        ],
-                    },
-                ],
-            },
-        ],
-    }
-    cl = Changelog(data)
+    versions_test = [
+        Version("Unreleased"),
+        Version("0.0.1", "2023-03-17", [Change("Added", ["Initial setup"])]),
+    ]
+
+    cl = Changelog(repository="https://github.com/sauljabin/changeloggh", versions=versions_test)
     print(cl.to_string())
     print(cl.to_dict())
     print(cl.to_json(indent=True))

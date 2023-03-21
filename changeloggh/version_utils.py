@@ -5,8 +5,8 @@ import semver
 
 def version_comparator():
     def compare(a, b):
-        a_version = a["version"].lower()
-        b_version = b["version"].lower()
+        a_version = a.version.lower()
+        b_version = b.version.lower()
 
         if a_version == "unreleased":
             return -1
@@ -20,8 +20,8 @@ def version_comparator():
 
 def change_comparator():
     def compare(a, b):
-        a_version = a["type"].lower()
-        b_version = b["type"].lower()
+        a_version = a.change_type.lower()
+        b_version = b.change_type.lower()
 
         if a_version < b_version:
             return -1

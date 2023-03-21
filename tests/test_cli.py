@@ -6,7 +6,12 @@ from click.testing import CliRunner
 from changeloggh import VERSION
 from changeloggh.changelog import Changelog
 from changeloggh.cli import main
-from tests.test_changelog import DATA_EXAMPLE, REPO_INPUT, CHANGELOG_EXAMPLE, JSON_INDENT_EXAMPLE
+from tests.test_changelog import (
+    REPO_EXAMPLE,
+    CHANGELOG_EXAMPLE,
+    JSON_INDENT_EXAMPLE,
+    VERSIONS_EXAMPLE,
+)
 
 
 class TestApp(TestCase):
@@ -21,7 +26,7 @@ class TestApp(TestCase):
         runner = CliRunner()
         mock_class_path.return_value.exists.return_value = True
 
-        result = runner.invoke(main, ["init", REPO_INPUT])
+        result = runner.invoke(main, ["init", REPO_EXAMPLE])
 
         mock_class_path.assert_has_calls([call("./CHANGELOG.md"), call().exists()])
         # , call("./changelog.lock"), call().exists()
@@ -36,7 +41,7 @@ class TestApp(TestCase):
         runner = CliRunner()
         mock_class_path.return_value.exists.side_effect = [False, True]
 
-        result = runner.invoke(main, ["init", REPO_INPUT])
+        result = runner.invoke(main, ["init", REPO_EXAMPLE])
 
         mock_class_path.assert_has_calls(
             [call("./CHANGELOG.md"), call().exists(), call("./changelog.lock"), call().exists()]
@@ -53,9 +58,9 @@ class TestApp(TestCase):
         mock_class_path.return_value.exists.side_effect = [False, False]
 
         runner = CliRunner()
-        result = runner.invoke(main, ["init", REPO_INPUT])
+        result = runner.invoke(main, ["init", REPO_EXAMPLE])
 
-        mock_function_empty.assert_called_with(REPO_INPUT)
+        mock_function_empty.assert_called_with(REPO_EXAMPLE)
         mock_function_empty.return_value.save.assert_called_once()
         self.assertEqual(0, result.exit_code)
 
@@ -64,15 +69,17 @@ class TestApp(TestCase):
         mock_function_empty.return_value = MagicMock()
 
         runner = CliRunner()
-        result = runner.invoke(main, ["init", "--force", REPO_INPUT])
+        result = runner.invoke(main, ["init", "--force", REPO_EXAMPLE])
 
-        mock_function_empty.assert_called_with(REPO_INPUT)
+        mock_function_empty.assert_called_with(REPO_EXAMPLE)
         mock_function_empty.return_value.save.assert_called_once()
         self.assertEqual(0, result.exit_code)
 
     @patch("changeloggh.cli.load_changelog")
     def test_print_text(self, mock_function_load):
-        mock_function_load.return_value = Changelog(DATA_EXAMPLE)
+        mock_function_load.return_value = Changelog(
+            repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE
+        )
 
         runner = CliRunner()
         result = runner.invoke(main, ["print", "--format", "text"])
@@ -82,7 +89,9 @@ class TestApp(TestCase):
 
     @patch("changeloggh.cli.load_changelog")
     def test_print_json(self, mock_function_load):
-        mock_function_load.return_value = Changelog(DATA_EXAMPLE)
+        mock_function_load.return_value = Changelog(
+            repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE
+        )
 
         runner = CliRunner()
         result = runner.invoke(main, ["print", "--format", "json"])
@@ -94,7 +103,7 @@ class TestApp(TestCase):
     @patch("changeloggh.cli.Console")
     @patch("changeloggh.cli.load_changelog")
     def test_print_default(self, mock_function_load, mock_console_function, mock_md_class):
-        cl = Changelog(DATA_EXAMPLE)
+        cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
         mock_function_load.return_value = cl
 
         runner = CliRunner()
