@@ -14,6 +14,8 @@
 that generates and administrate changelog files for GitHub
 according to https://keepachangelog.com/en/1.1.0/.
 
+![](https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/terminal.png)
+
 # Installation
 
 Install with pip:
@@ -75,10 +77,6 @@ Print CHANGELOG:
 changeloggh print --format <rich|json|text>
 ```
 
-## Screenshots
-
-![](https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/terminal.png)
-
 ## Development
 
 Installing poetry:
@@ -129,7 +127,7 @@ poetry run python -m scripts.bump <major|minor|patch>
 
 A lot of tools (like `yarn`, `npm`, `poetry` ,etc) use `lock files` to
 ensures that installations remain identical and reproducible
-across systems. A `lock files` saves important metadata, tha is why
+across systems. A `lock files` saves important metadata, so that is why
 `changeloggh` is using this approach. The `changelog.lock` file
 saves and structures changelog data in a json format.
 It's highly recommended to commit the `changelog.lock` file into your repository.
