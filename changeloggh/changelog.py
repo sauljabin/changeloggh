@@ -23,8 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 {% if version.changes %}{% for change in version.changes %}
 ### {{change}}
 {% if change.entries %}{% for item in change.entries %}
-- {{item}}
-{% endfor %}{% endif %}{% endfor %}{% endif %}{% endfor %}{% endif %}
+- {{item}}{% endfor %}
+{% endif %}{% endfor %}{% endif %}{% endfor %}{% endif %}
 {% for link in links %}{{link}}
 {% endfor %}
 """

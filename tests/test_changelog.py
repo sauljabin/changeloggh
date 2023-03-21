@@ -31,11 +31,20 @@ CHANGELOG_EXAMPLE = f"""
 
 ## [Unreleased]
 
+### Added
+
+- New command
+
 ## [1.0.1] - 2023-03-17
 
 ### Added
 
+- New feature
 - Tests
+
+### Security
+
+- New patch
 
 ## [0.0.1] - 2023-03-17
 
@@ -49,8 +58,12 @@ CHANGELOG_EXAMPLE = f"""
 """.strip()
 
 VERSIONS_EXAMPLE = [
-    Version("Unreleased"),
-    Version("1.0.1", "2023-03-17", [Change("Added", ["Tests"])]),
+    Version(version="Unreleased", changes=[Change("Added", ["New command"])]),
+    Version(
+        "1.0.1",
+        "2023-03-17",
+        [Change("Added", ["New feature", "Tests"]), Change("Security", ["New patch"])],
+    ),
     Version("0.0.1", "2023-03-17", [Change("Added", ["Initial setup"])]),
 ]
 
@@ -59,6 +72,14 @@ DICT_EXAMPLE = {
     "versions": [
         {
             "version": "Unreleased",
+            "changes": [
+                {
+                    "type": "Added",
+                    "entries": [
+                        "New command",
+                    ],
+                },
+            ],
         },
         {
             "version": "1.0.1",
@@ -67,7 +88,14 @@ DICT_EXAMPLE = {
                 {
                     "type": "Added",
                     "entries": [
+                        "New feature",
                         "Tests",
+                    ],
+                },
+                {
+                    "type": "Security",
+                    "entries": [
+                        "New patch",
                     ],
                 },
             ],
@@ -174,6 +202,7 @@ class TestApp(TestCase):
                 {
                     "type": "Added",
                     "entries": [
+                        "New command",
                         "new change 1",
                         "new change 2",
                     ],
@@ -247,6 +276,7 @@ class TestApp(TestCase):
                 {
                     "type": "Added",
                     "entries": [
+                        "New command",
                         "new added change",
                     ],
                 },
