@@ -148,7 +148,7 @@ def removed(entries: List[str]):
 
 @main.command("security")
 @click.argument("entries", nargs=-1)
-def security_change(entries: List[str]):
+def security(entries: List[str]):
     """
     Add new entries to "Security" change type.
 
@@ -172,7 +172,7 @@ def add_entry(change_type, entries):
 
 
 @main.command("latest")
-def security():
+def latest():
     """
     Print latest (current) version.
     """
