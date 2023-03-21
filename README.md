@@ -11,7 +11,7 @@
 <a href="https://pypi.org/project/changeloggh"><img alt="Platform" src="https://img.shields.io/badge/platform-linux%20%7C%20osx-blueviolet"></a>
 
 `changeloggh` is a command line tool
-that generates and administrate changelog files for GitHub
+to generate and administrate changelog files for GitHub
 according to https://keepachangelog.com/en/1.1.0/.
 
 ![](https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/terminal.png)
