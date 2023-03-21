@@ -26,7 +26,6 @@ semver = "^2"
 unittest = "*"
 ruff = "*"
 black = "^23"
-faker = "^17"
 coverage = {extras = ["toml"], version = "^7"}
 toml = "*"
 

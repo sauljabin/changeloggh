@@ -2,7 +2,15 @@
     "repository": "https://github.com/sauljabin/changeloggh",
     "versions": [
         {
-            "version": "Unreleased"
+            "version": "Unreleased",
+            "changes": [
+                {
+                    "type": "Removed",
+                    "entries": [
+                        "Remove faker from dev"
+                    ]
+                }
+            ]
         },
         {
             "version": "0.2.0",

@@ -227,7 +227,7 @@ def release(version: str):
     "--force",
     is_flag=True,
     default=False,
-    help='Force to override "changelog.lock" file.',
+    help='Force to override the "changelog.lock" file.',
     show_default=True,
 )
 def import_md(force: bool):

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- Remove faker from dev
+
 ## [0.2.0] - 2023-03-21
 
 ### Added
