@@ -110,8 +110,6 @@ It's highly recommended to commit the `changelog.lock` file into your repository
 
 # TODO
 
-- release command
-- current
 - import from md
 - readme
 - bump script

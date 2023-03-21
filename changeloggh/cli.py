@@ -13,6 +13,7 @@ from changeloggh.changelog import (
     empty_changelog,
     load_changelog,
     ChangeType,
+    BumpRule,
 )
 
 
@@ -178,6 +179,20 @@ def latest():
     """
     cl = load_changelog()
     print(cl.latest())
+
+
+@main.command("release")
+@click.argument(
+    "rule", type=click.Choice(["major", "minor", "patch"], case_sensitive=False), nargs=1
+)
+def release(rule: str):
+    """
+    Release a new version.
+    """
+
+    cl = load_changelog()
+    print(cl.release(BumpRule[rule]))
+    cl.save()
 
 
 if __name__ == "__main__":

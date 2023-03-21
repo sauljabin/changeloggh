@@ -2,7 +2,11 @@
     "repository": "https://github.com/sauljabin/changeloggh",
     "versions": [
         {
-            "version": "Unreleased",
+            "version": "Unreleased"
+        },
+        {
+            "version": "0.1.0",
+            "date": "2023-03-21",
             "changes": [
                 {
                     "type": "Added",

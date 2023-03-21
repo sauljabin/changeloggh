@@ -4,7 +4,7 @@ from unittest.mock import patch, call, MagicMock
 from click.testing import CliRunner
 
 from changeloggh import VERSION
-from changeloggh.changelog import Changelog, ChangeType
+from changeloggh.changelog import Changelog, ChangeType, BumpRule
 from changeloggh.cli import main
 from tests.test_changelog import (
     REPO_EXAMPLE,
@@ -150,7 +150,7 @@ class TestApp(TestCase):
             )
 
     @patch("changeloggh.cli.load_changelog")
-    def test_latest_default(self, mock_function_load):
+    def test_latest(self, mock_function_load):
         cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
         mock_function_load.return_value = cl
 
@@ -159,3 +159,19 @@ class TestApp(TestCase):
 
         self.assertEqual(0, result.exit_code)
         self.assertEqual("1.0.1", result.output.strip())
+
+    @patch("changeloggh.cli.load_changelog")
+    def test_release_command(self, mock_function_load):
+        for rule, version in [("major", "2.0.0"), ("minor", "1.1.0"), ("patch", "1.0.2")]:
+            mock_function_load.return_value = MagicMock()
+            mock_function_load.return_value.release.return_value = version
+
+            runner = CliRunner()
+            result = runner.invoke(main, ["release", rule])
+
+            mock_function_load.assert_called()
+            mock_function_load.return_value.release.assert_called_with(BumpRule[rule])
+            mock_function_load.return_value.save.assert_called_once()
+
+            self.assertEqual(0, result.exit_code)
+            self.assertEqual(version, result.output.strip())

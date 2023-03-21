@@ -248,6 +248,8 @@ class Changelog:
         self.versions[0].changes = None
         self.versions.sort(key=version_comparator())
 
+        return str(semver)
+
 
 def load_changelog() -> Changelog:
     def json_to_changelog(obj: dict[Any, Any]):
