@@ -12,6 +12,7 @@ from changeloggh.changelog import (
     load_changelog,
     ChangeType,
     BumpRule,
+    parse_changelog,
 )
 
 REPO_EXAMPLE = "https://github.com/sauljabin/changeloggh"
@@ -591,3 +592,8 @@ class TestApp(TestCase):
             cl.release(version)
 
         self.assertEqual("Version 1.0.0 exists already", str(context.exception))
+
+    @patch("builtins.open", new_callable=mock_open, read_data=CHANGELOG_EXAMPLE)
+    def test_import(self, mock_open_function):
+        cl = parse_changelog()
+        self.assertEqual(DICT_EXAMPLE, cl.to_dict())

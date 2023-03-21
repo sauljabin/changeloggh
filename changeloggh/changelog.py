@@ -291,12 +291,35 @@ def load_changelog() -> Changelog:
     return changelog
 
 
-def empty_changelog(repository=""):
+def empty_changelog(repository="") -> Changelog:
     return Changelog(repository=repository, versions=[Version(version="Unreleased")])
 
 
-def parse_changelog():
-    pass
+def parse_changelog() -> Changelog:
+    with open(CHANGELOG_PATH, "r") as content:
+        lines = content.readlines()
+
+    versions = []
+    repo = ""
+
+    for line in lines:
+        if line.startswith("## "):
+            version_header = line.strip("##").strip().split(" - ")
+            str_version = version_header[0].strip("[").strip("]")
+            str_date = version_header[1] if len(version_header) > 1 else None
+            versions.append(Version(version=str_version, release_date=str_date, changes=[]))
+        if line.startswith("### "):
+            version = versions[-1]
+            version.changes.append(Change(change_type=line.strip("### ").strip(), entries=[]))
+        if line.startswith("- "):
+            version = versions[-1]
+            change = version.changes[-1]
+            change.entries.append(line.strip("- ").strip())
+        if line.startswith("[Unreleased]: "):
+            repo = line.strip().strip("[Unreleased]: ")
+            repo = repo[: repo.index("/compare")]
+
+    return Changelog(versions=versions, repository=repo)
 
 
 if __name__ == "__main__":
