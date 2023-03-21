@@ -148,3 +148,14 @@ class TestApp(TestCase):
                 './changelog.lock file does not exist. Use "init" command to initialize.',
                 result.output.strip(),
             )
+
+    @patch("changeloggh.cli.load_changelog")
+    def test_latest_default(self, mock_function_load):
+        cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
+        mock_function_load.return_value = cl
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["latest"])
+
+        self.assertEqual(0, result.exit_code)
+        self.assertEqual("1.0.1", result.output.strip())

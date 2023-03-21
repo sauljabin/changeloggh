@@ -148,7 +148,7 @@ def removed(entries: List[str]):
 
 @main.command("security")
 @click.argument("entries", nargs=-1)
-def security(entries: List[str]):
+def security_change(entries: List[str]):
     """
     Add new entries to "Security" change type.
 
@@ -169,6 +169,15 @@ def add_entry(change_type, entries):
     for entry in entries:
         cl.add(change_type, entry)
     cl.save()
+
+
+@main.command("latest")
+def security():
+    """
+    Print latest (current) version.
+    """
+    cl = load_changelog()
+    print(cl.latest())
 
 
 if __name__ == "__main__":

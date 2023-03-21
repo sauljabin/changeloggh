@@ -1,5 +1,6 @@
 import copy
 import json
+from datetime import date
 from unittest import TestCase
 from unittest.mock import patch, mock_open, call
 
@@ -10,6 +11,7 @@ from changeloggh.changelog import (
     empty_changelog,
     load_changelog,
     ChangeType,
+    BumpRule,
 )
 
 REPO_EXAMPLE = "https://github.com/sauljabin/changeloggh"
@@ -369,3 +371,119 @@ class TestApp(TestCase):
         cl = Changelog(versions=input_data)
 
         self.assertEqual(expected_data, cl.to_dict())
+
+    def test_raise_error_if_there_are_not_versions(self):
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(versions=[])
+            cl.release(BumpRule.patch)
+
+        self.assertEqual("There are not available versions.", str(context.exception))
+
+    def test_raise_error_if_there_are_not_changes(self):
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(versions=[Version("Unreleased")])
+            cl.release(BumpRule.patch)
+
+        self.assertEqual("There are not available changes.", str(context.exception))
+
+    def test_raise_error_if_there_is_not_unreleased(self):
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(versions=[Version("0.0.1", changes=[Change()])])
+            cl.release(BumpRule.patch)
+
+        self.assertEqual("There are not available changes.", str(context.exception))
+
+    def test_raise_error_if_version_is_none(self):
+        with self.assertRaises(Exception) as context:
+            cl = Changelog(versions=[Version(changes=[Change()])])
+            cl.release(BumpRule.patch)
+
+        self.assertEqual("There are not available changes.", str(context.exception))
+
+    def test_get_version_zero_if_no_versions(self):
+        cl = Changelog(versions=[])
+        self.assertEqual("0.0.0", cl.latest())
+
+    def test_get_version_zero_if_there_is_only_unreleased(self):
+        cl = Changelog(versions=[Version("Unreleased")])
+        self.assertEqual("0.0.0", cl.latest())
+
+    def test_get_version_if_there_is_only_one(self):
+        version = "0.0.1"
+        cl = Changelog(versions=[Version(version)])
+        self.assertEqual(version, cl.latest())
+
+    def test_get_version_happy_path(self):
+        version = "0.0.1"
+        cl = Changelog(versions=[Version("Unreleased"), Version(version)])
+        self.assertEqual(version, cl.latest())
+
+    def test_bump_version_whit_no_previous_version(self):
+        for rule, version in [("patch", "0.0.1"), ("minor", "0.1.0"), ("major", "1.0.0")]:
+            expected_data = {
+                "versions": [
+                    {
+                        "version": "Unreleased",
+                    },
+                    {
+                        "version": version,
+                        "date": str(date.today()),
+                        "changes": [
+                            {"type": "Added", "entries": ["Initial"]},
+                        ],
+                    },
+                ],
+            }
+            cl = Changelog(
+                versions=[
+                    Version(
+                        version="Unreleased",
+                        changes=[Change(change_type="Added", entries=["Initial"])],
+                    )
+                ]
+            )
+
+            cl.release(BumpRule[rule])
+
+            self.assertEqual(expected_data, cl.to_dict())
+
+    def test_bump_version_whit_with_previous_version(self):
+        for rule, version in [("patch", "1.0.1"), ("minor", "1.1.0"), ("major", "2.0.0")]:
+            expected_data = {
+                "versions": [
+                    {
+                        "version": "Unreleased",
+                    },
+                    {
+                        "version": version,
+                        "date": str(date.today()),
+                        "changes": [
+                            {"type": "Added", "entries": ["Test"]},
+                        ],
+                    },
+                    {
+                        "version": "1.0.0",
+                        "date": str(date.today()),
+                        "changes": [
+                            {"type": "Added", "entries": ["Initial"]},
+                        ],
+                    },
+                ],
+            }
+            cl = Changelog(
+                versions=[
+                    Version(
+                        version="Unreleased",
+                        changes=[Change(change_type="Added", entries=["Test"])],
+                    ),
+                    Version(
+                        version="1.0.0",
+                        release_date=str(date.today()),
+                        changes=[Change(change_type="Added", entries=["Initial"])],
+                    ),
+                ]
+            )
+
+            cl.release(BumpRule[rule])
+
+            self.assertEqual(expected_data, cl.to_dict())

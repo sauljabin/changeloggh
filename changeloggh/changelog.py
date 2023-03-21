@@ -1,14 +1,13 @@
 import json
-
+from datetime import date
 from enum import Enum
 from typing import List, Any
 
 from jinja2 import Environment
-
+from semver import VersionInfo
 
 from changeloggh.url_utils import url_join
 from changeloggh.version_utils import version_comparator, change_comparator
-
 
 CHANGELOG_PATH = "./CHANGELOG.md"
 CHANGELOG_LOCK_PATH = "./changelog.lock"
@@ -54,6 +53,12 @@ class ChangeType(Enum):
     Fixed = "Fixed"
     Removed = "Removed"
     Security = "Security"
+
+
+class BumpRule(Enum):
+    major = "major"
+    minor = "minor"
+    patch = "patch"
 
 
 class Change:
@@ -207,6 +212,41 @@ class Changelog:
         if self.versions:
             changelog_dict["versions"] = [version.to_dict() for version in self.versions]
         return changelog_dict
+
+    def latest(self):
+        if not self.versions or (
+            len(self.versions) == 1 and self.versions[0].version == "Unreleased"
+        ):
+            return "0.0.0"
+
+        if len(self.versions) == 1 and self.versions[0].version != "Unreleased":
+            return self.versions[0].version
+
+        return self.versions[1].version
+
+    def release(self, rule: BumpRule):
+        if not self.versions:
+            raise Exception("There are not available versions.")
+        if (
+            not self.versions[0].changes
+            or not self.versions[0].version
+            or self.versions[0].version != "Unreleased"
+        ):
+            raise Exception("There are not available changes.")
+
+        semver = VersionInfo.parse(self.latest())
+
+        match rule:
+            case BumpRule.major:
+                semver = semver.bump_major()
+            case BumpRule.minor:
+                semver = semver.bump_minor()
+            case BumpRule.patch:
+                semver = semver.bump_patch()
+
+        self.versions.append(Version(str(semver), str(date.today()), self.versions[0].changes))
+        self.versions[0].changes = None
+        self.versions.sort(key=version_comparator())
 
 
 def load_changelog() -> Changelog:
