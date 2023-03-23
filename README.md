@@ -89,6 +89,11 @@ Installing development dependencies:
 poetry install
 ```
 
+Installing pre-commit:
+```sh
+poetry run pre-commit install
+```
+
 Running unit tests:
 ```sh
 poetry run python -m scripts.tests

@@ -172,6 +172,7 @@ def add_entry(change_type, entries):
         cl.add(change_type, entry)
     cl.save()
 
+
 @main.command("update")
 def update():
     """
@@ -183,6 +184,7 @@ def update():
         exit(1)
     cl = load_changelog()
     cl.save()
+
 
 @main.command("latest")
 def latest():

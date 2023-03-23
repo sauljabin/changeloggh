@@ -23,11 +23,11 @@ jinja2 = "^3"
 semver = "^2"
 
 [tool.poetry.dev-dependencies]
-unittest = "*"
 ruff = "*"
 black = "^23"
 coverage = {extras = ["toml"], version = "^7"}
 toml = "*"
+pre-commit = "*"
 
 [tool.black]
 line-length = 100
