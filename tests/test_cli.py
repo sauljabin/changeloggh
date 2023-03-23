@@ -149,8 +149,10 @@ class TestApp(TestCase):
                 result.output.strip(),
             )
 
+    @patch("changeloggh.cli.Path")
     @patch("changeloggh.cli.load_changelog")
-    def test_latest(self, mock_function_load):
+    def test_latest(self, mock_function_load, mock_class_path):
+        mock_class_path.return_value.exists.return_value = True
         cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
         mock_function_load.return_value = cl
 
@@ -290,3 +292,43 @@ class TestApp(TestCase):
         mock_function_parse.assert_called_with()
         mock_function_parse.return_value.save.assert_called_once()
         self.assertEqual(0, result.exit_code)
+
+    @patch("changeloggh.cli.load_changelog", new_callable=MagicMock())
+    @patch("changeloggh.cli.Path")
+    def test_update(self, mock_class_path, mock_function_load):
+        mock_class_path.return_value.exists.return_value = True
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["update"])
+
+        mock_function_load.assert_called()
+        mock_function_load.return_value.save.assert_called_once()
+        self.assertEqual(0, result.exit_code)
+
+    @patch("changeloggh.cli.Path")
+    def test_reject_update_if_file_does_not_exist(self, mock_class_path):
+        mock_class_path.return_value.exists.return_value = False
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["update"])
+
+        mock_class_path.assert_has_calls([call("./changelog.lock"), call().exists()])
+        self.assertEqual(1, result.exit_code)
+        self.assertEqual(
+            './changelog.lock file does not exist. Use "init" command to initialize.',
+            result.output.strip(),
+        )
+
+    @patch("changeloggh.cli.Path")
+    def test_reject_latest_if_file_does_not_exist(self, mock_class_path):
+        mock_class_path.return_value.exists.return_value = False
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["latest"])
+
+        mock_class_path.assert_has_calls([call("./changelog.lock"), call().exists()])
+        self.assertEqual(1, result.exit_code)
+        self.assertEqual(
+            './changelog.lock file does not exist. Use "init" command to initialize.',
+            result.output.strip(),
+        )

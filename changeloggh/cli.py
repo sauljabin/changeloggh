@@ -172,12 +172,27 @@ def add_entry(change_type, entries):
         cl.add(change_type, entry)
     cl.save()
 
+@main.command("update")
+def update():
+    """
+    Update the CHANGELOG.md file.
+    """
+    path = Path(CHANGELOG_LOCK_PATH)
+    if not path.exists():
+        print(f'{CHANGELOG_LOCK_PATH} file does not exist. Use "init" command to initialize.')
+        exit(1)
+    cl = load_changelog()
+    cl.save()
 
 @main.command("latest")
 def latest():
     """
     Print latest (current) version.
     """
+    path = Path(CHANGELOG_LOCK_PATH)
+    if not path.exists():
+        print(f'{CHANGELOG_LOCK_PATH} file does not exist. Use "init" command to initialize.')
+        exit(1)
     cl = load_changelog()
     print(cl.latest())
 
