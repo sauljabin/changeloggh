@@ -14,7 +14,10 @@
 to generate and administrate changelog files for GitHub
 according to https://keepachangelog.com/en/1.1.0/.
 
-![](https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/terminal.png)
+<p align="center">
+<img width="45%" src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/md.png">
+<img width="45%" src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/json.png">
+</p>
 
 # Installation
 
