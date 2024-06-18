@@ -21,14 +21,13 @@ according to https://keepachangelog.com/en/1.1.0/.
 
 # Installation
 
-Install with pip:
 ```sh
-pip install changeloggh
+pipx install changeloggh
 ```
 
 Upgrade with pip:
 ```sh
-pip install --upgrade changeloggh
+pipx upgrade changeloggh
 ```
 
 ## Usage
@@ -84,7 +83,7 @@ changeloggh print --format <rich|json|text>
 
 Installing poetry:
 ```sh
-pip install poetry
+pipx install poetry
 ```
 
 Installing development dependencies:
