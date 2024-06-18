@@ -21,27 +21,31 @@ def main(rule):
 
     More info at https://python-poetry.org/docs/cli/#version and https://semver.org/.
     """
-
-    bump_version(rule)
-    new_app_version = get_app_version()
-    changelog_release(new_app_version)
-
     console = Console()
-    confirmation = console.input(
-        f"Release a new [purple bold]{rule}[/] version [bold purple]{new_app_version}[/] ([bold"
-        " green]yes[/]/[bold red]no[/])? "
-    )
 
-    if confirmation != "yes":
-        revert_changes()
-        exit(1)
+    try:
+        bump_version(rule)
+        new_app_version = get_app_version()
 
-    confirm_changes(new_app_version)
+        changelog_release(new_app_version)
+
+        confirmation = console.input(
+            f"Release a new [purple bold]{rule}[/] version [bold purple]{new_app_version}[/] ([bold"
+            " green]yes[/]/[bold red]no[/])? "
+        )
+
+        if confirmation != "yes":
+            revert_changes()
+            exit(1)
+
+        confirm_changes(new_app_version)
+    except Exception as e:
+        console.print(str(e))
 
 
 def changelog_release(version):
     init_commands = {
-        f"bumping changelog to a [purple bold]{version}[/] version": (
+        f"updating changelog to a [purple bold]{version}[/] version": (
             f"poetry run changeloggh release {version}"
         ),
     }
@@ -54,7 +58,7 @@ def bump_version(rule):
         "checking pending changes": "git diff --exit-code",
         "checking pending changes in stage": "git diff --staged --exit-code",
         "checking not pushed commits": "git diff --exit-code main origin/main",
-        f"bumping to a [purple bold]{rule}[/] version": f"poetry version {rule}",
+        f"updating to a [purple bold]{rule}[/] version": f"poetry version {rule}",
     }
     command_processor = CommandProcessor(init_commands)
     command_processor.run()
@@ -63,7 +67,7 @@ def bump_version(rule):
 def confirm_changes(app_version):
     confirm_commands = {
         "adding new version": "git add --all",
-        "committing new version": f"git commit -m 'bumping version to {app_version}'",
+        "committing new version": f"git commit -m 'updating version to {app_version}'",
         "adding new version tag": f"git tag v{app_version}",
         "pushing new changes": "git push origin main",
         "pushing tag": "git push --tags",

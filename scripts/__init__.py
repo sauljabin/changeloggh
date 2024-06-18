@@ -19,11 +19,10 @@ class CommandProcessor:
             command_split = shlex.split(command)
             result = subprocess.run(command_split)
             if result.returncode:
-                console.print(
+                raise Exception(
                     f"\n[bold red]Error:exclamation:[/] in [bold blue]{name} ([bold"
                     f" yellow]{command}[/])[/]"
                 )
-                sys.exit(result.returncode)
 
 
 if __name__ == "__main__":

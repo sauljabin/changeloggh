@@ -2,7 +2,15 @@
     "repository": "https://github.com/sauljabin/changeloggh",
     "versions": [
         {
-            "version": "Unreleased"
+            "version": "Unreleased",
+            "changes": [
+                {
+                    "type": "Fixed",
+                    "entries": [
+                        "get version"
+                    ]
+                }
+            ]
         },
         {
             "version": "1.0.5",
