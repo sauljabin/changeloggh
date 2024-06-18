@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "changeloggh"
-version = "1.0.6"
+version = "1.0.7"
 description = "changeloggh is a command line tool that generates changelog files for github"
 authors = ["Saúl Piña <sauljabin@gmail.com>"]
 license = "MIT"
@@ -24,8 +24,8 @@ semver = "^3"
 
 [tool.poetry.dev-dependencies]
 ruff = "*"
-black = "^24"
-coverage = {extras = ["toml"], version = "^7"}
+black = "*"
+coverage = {extras = ["toml"], version = "*"}
 toml = "*"
 pre-commit = "*"
 
