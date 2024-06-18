@@ -27,7 +27,11 @@ def main(rule):
         bump_version(rule)
         new_app_version = get_app_version()
 
-        changelog_release(new_app_version)
+        try:
+            changelog_release(new_app_version)
+        except Exception as changelog_e:
+            revert_changes()
+            raise changelog_e
 
         confirmation = console.input(
             f"Release a new [purple bold]{rule}[/] version [bold purple]{new_app_version}[/] ([bold"

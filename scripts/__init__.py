@@ -1,6 +1,5 @@
 import shlex
 import subprocess
-import sys
 
 from rich.console import Console
 
