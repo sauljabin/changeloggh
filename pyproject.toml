@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "changeloggh"
-version = "1.0.9"
+version = "1.0.10"
 description = "changeloggh is a command line tool that generates changelog files for github"
 authors = ["Saúl Piña <sauljabin@gmail.com>"]
 license = "MIT"
