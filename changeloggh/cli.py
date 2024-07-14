@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import List
 
-import click
+import cloup
+from cloup import Section
 from rich import print_json
 from rich.console import Console
 from rich.markdown import Markdown
@@ -18,28 +19,42 @@ from changeloggh.changelog import (
 )
 
 
-@click.version_option(VERSION)
-@click.group()
+START = Section("Start a changelog file")
+ADD = Section("Add new entries")
+EXAMINE = Section("Examine changelog")
+RELEASE = Section("Release version")
+
+
+@cloup.version_option(VERSION)
+@cloup.group()
 def main():
+    """
+    changeloggh is a command line tool to generate and administrate
+    changelog files for GitHub according to https://keepachangelog.com/en/1.1.0/.
+
+    changeloggh uses a changelog.lock file, it saves and structures changelog data in json format.
+    It's highly recommended to commit the changelog.lock file into your repository.
+    """
     pass
 
 
-@main.command("init")
-@click.option(
+@main.command("init", section=START)
+@cloup.option(
     "--force",
     is_flag=True,
     default=False,
     help="Force saving an empty CHANGELOG file.",
     show_default=True,
 )
-@click.argument("repository", nargs=1)
+@cloup.argument("repository", nargs=1)
 def init(force: bool, repository: str):
     """
     Initialize a CHANGELOG.md file.
 
+    ex.: changeloggh init https://github.com/sauljabin/changeloggh
+
     \b
     REPOSITORY  GitHub Repository.
-                (ex.: https://github.com/sauljabin/changeloggh).
     """
 
     if not force:
@@ -53,10 +68,10 @@ def init(force: bool, repository: str):
     changelog.save()
 
 
-@main.command("print")
-@click.option(
+@main.command("print", section=EXAMINE)
+@cloup.option(
     "--format",
-    type=click.Choice(["rich", "text", "json"], case_sensitive=False),
+    type=cloup.Choice(["rich", "text", "json"], case_sensitive=False),
     default="rich",
     help="What format to use.",
     show_default=True,
@@ -78,8 +93,8 @@ def print_changelog(format: str):
             print_json(cl.to_json(), indent=4)
 
 
-@main.command("added")
-@click.argument("entries", nargs=-1)
+@main.command("added", section=ADD)
+@cloup.argument("entries", nargs=-1)
 def added(entries: List[str]):
     """
     Add new entries to "Added" change type.
@@ -92,8 +107,8 @@ def added(entries: List[str]):
     add_entry(ChangeType.Added, entries)
 
 
-@main.command("changed")
-@click.argument("entries", nargs=-1)
+@main.command("changed", section=ADD)
+@cloup.argument("entries", nargs=-1)
 def changed(entries: List[str]):
     """
     Add new entries to "Changed" change type.
@@ -106,8 +121,8 @@ def changed(entries: List[str]):
     add_entry(ChangeType.Changed, entries)
 
 
-@main.command("deprecated")
-@click.argument("entries", nargs=-1)
+@main.command("deprecated", section=ADD)
+@cloup.argument("entries", nargs=-1)
 def deprecated(entries: List[str]):
     """
     Add new entries to "Deprecated" change type.
@@ -120,8 +135,8 @@ def deprecated(entries: List[str]):
     add_entry(ChangeType.Deprecated, entries)
 
 
-@main.command("fixed")
-@click.argument("entries", nargs=-1)
+@main.command("fixed", section=ADD)
+@cloup.argument("entries", nargs=-1)
 def fixed(entries: List[str]):
     """
     Add new entries to "Fixed" change type.
@@ -134,8 +149,8 @@ def fixed(entries: List[str]):
     add_entry(ChangeType.Fixed, entries)
 
 
-@main.command("removed")
-@click.argument("entries", nargs=-1)
+@main.command("removed", section=ADD)
+@cloup.argument("entries", nargs=-1)
 def removed(entries: List[str]):
     """
     Add new entries to "Removed" change type.
@@ -148,8 +163,8 @@ def removed(entries: List[str]):
     add_entry(ChangeType.Removed, entries)
 
 
-@main.command("security")
-@click.argument("entries", nargs=-1)
+@main.command("security", section=ADD)
+@cloup.argument("entries", nargs=-1)
 def security(entries: List[str]):
     """
     Add new entries to "Security" change type.
@@ -186,10 +201,10 @@ def update():
     cl.save()
 
 
-@main.command("latest")
+@main.command("latest", section=EXAMINE)
 def latest():
     """
-    Print latest (current) version.
+    Print latest version.
     """
     path = Path(CHANGELOG_LOCK_PATH)
     if not path.exists():
@@ -199,9 +214,9 @@ def latest():
     print(cl.latest())
 
 
-@main.command("bump")
-@click.argument(
-    "rule", type=click.Choice(["major", "minor", "patch"], case_sensitive=False), nargs=1
+@main.command("bump", section=RELEASE)
+@cloup.argument(
+    "rule", type=cloup.Choice(["major", "minor", "patch"], case_sensitive=False), nargs=1
 )
 def bump(rule: str):
     """
@@ -220,8 +235,8 @@ def bump(rule: str):
         exit(1)
 
 
-@main.command("release")
-@click.argument("version", nargs=1)
+@main.command("release", section=RELEASE)
+@cloup.argument("version", nargs=1)
 def release(version: str):
     """
     Release a specific version.
@@ -239,8 +254,8 @@ def release(version: str):
         exit(1)
 
 
-@main.command("import")
-@click.option(
+@main.command("import", section=START)
+@cloup.option(
     "--force",
     is_flag=True,
     default=False,
