@@ -2,7 +2,16 @@
     "repository": "https://github.com/sauljabin/changeloggh",
     "versions": [
         {
-            "version": "Unreleased"
+            "version": "Unreleased",
+            "changes": [
+                {
+                    "type": "Changed",
+                    "entries": [
+                        "Help message",
+                        "Changed click to cloup"
+                    ]
+                }
+            ]
         },
         {
             "version": "1.0.9",
