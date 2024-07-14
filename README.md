@@ -132,9 +132,9 @@ poetry run python -m scripts.bump <major|minor|patch>
 
 ## Why a lock file?
 
-A lot of tools (like `yarn`, `npm`, `poetry` ,etc) use `lock files` to
+A lot of tools (like `yarn`, `npm`, `poetry` ,etc) use lock files to
 ensures that installations remain identical and reproducible
-across systems. A `lock files` saves important metadata, so that is why
+across systems. A lock file saves important metadata, so that is why
 `changeloggh` is using this approach. The `changelog.lock` file
 saves and structures changelog data in json format.
 It's highly recommended to commit the `changelog.lock` file into your repository.
