@@ -21,10 +21,10 @@ according to https://keepachangelog.com/en/1.1.0/.
 <table>
   <tr>
     <td>
-        <img  src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/md.png">
+        <img  src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/live.png">
     </td>
     <td>
-        <img src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/json.png">
+        <img src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/live-sidebar.png">
     </td>
   </tr>
 </table>
