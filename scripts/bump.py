@@ -10,7 +10,7 @@ from scripts import CommandProcessor
     nargs=1,
     type=click.Choice(["major", "minor", "patch"], case_sensitive=False),
 )
-def main(rule):
+def main(rule: str) -> None:
     """
     \b
     Examples:
@@ -20,57 +20,51 @@ def main(rule):
 
     More info at https://python-poetry.org/docs/cli/#version and https://semver.org/.
     """
+    bump_version(rule)
+    new_app_version = get_app_version()
+    changelog_release(new_app_version)
+
     console = Console()
+    confirmation = console.input(
+        f"\n[bold]Release a new [purple]{rule}[/] version [purple]{new_app_version}[/]"
+        " ([green]yes[/]/[red]no[/])? [/]"
+    )
 
-    try:
-        bump_version(rule)
-        new_app_version = get_app_version()
+    if confirmation != "yes":
+        revert_changes()
+        exit(1)
 
-        try:
-            changelog_release(new_app_version)
-        except Exception as changelog_e:
-            revert_changes()
-            raise changelog_e
-
-        confirmation = console.input(
-            f"Release a new [purple bold]{rule}[/] version [bold purple]{new_app_version}[/] ([bold"
-            " green]yes[/]/[bold red]no[/])? "
-        )
-
-        if confirmation != "yes":
-            revert_changes()
-            exit(1)
-
-        confirm_changes(new_app_version)
-    except Exception as e:
-        console.print(str(e))
+    confirm_changes(new_app_version)
 
 
-def changelog_release(version):
+def changelog_release(version: str) -> None:
     init_commands = {
-        f"updating changelog to a [purple bold]{version}[/] version": (
+        f"upgrading changelog to a [purple bold]{version}[/] version": (
             f"poetry run changeloggh release {version}"
         ),
     }
-    command_processor = CommandProcessor(init_commands)
+    revert_commands = {
+        "deleting changes": "git checkout .",
+    }
+    command_processor = CommandProcessor(init_commands, revert_commands)
     command_processor.run()
 
 
-def bump_version(rule):
+def bump_version(rule: str) -> None:
     init_commands = {
         "checking pending changes": "git diff --exit-code",
         "checking pending changes in stage": "git diff --staged --exit-code",
         "checking not pushed commits": "git diff --exit-code main origin/main",
-        f"updating to a [purple bold]{rule}[/] version": f"poetry version {rule}",
+        f"upgrading to a [purple bold]{rule}[/] version": f"poetry version {rule}",
     }
     command_processor = CommandProcessor(init_commands)
     command_processor.run()
 
 
-def confirm_changes(app_version):
+def confirm_changes(app_version: str) -> None:
     confirm_commands = {
         "adding new version": "git add --all",
-        "committing new version": f"git commit -m 'updating version to {app_version}'",
+        "committing new version": f"git commit -m 'upgrading version to {app_version}'",
         "adding new version tag": f"git tag v{app_version}",
         "pushing new changes": "git push origin main",
         "pushing tag": "git push --tags",
@@ -79,7 +73,7 @@ def confirm_changes(app_version):
     command_processor.run()
 
 
-def revert_changes():
+def revert_changes() -> None:
     revert_commands = {
         "deleting changes": "git checkout .",
     }
