@@ -18,7 +18,6 @@ from changeloggh.changelog import (
     parse_changelog,
 )
 
-
 START = Section("Start a changelog file")
 ADD = Section("Add new entries")
 EXAMINE = Section("Examine changelog")

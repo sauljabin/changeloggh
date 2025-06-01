@@ -1,5 +1,6 @@
 # changeloggh
 
+<p align="center">
 <a href="https://www.python.org/"><img alt="Python" src="https://img.shields.io/badge/-python-success?logo=python&logoColor=white"></a>
 <a href="https://github.com/sauljabin/changeloggh"><img alt="GitHub" src="https://img.shields.io/badge/status-active-brightgreen"></a>
 <a href="https://github.com/sauljabin/changeloggh/blob/main/LICENSE"><img alt="MIT License" src="https://img.shields.io/github/license/sauljabin/changeloggh"></a>
@@ -9,17 +10,26 @@
 <a href="https://pypi.org/project/changeloggh"><img alt="Version" src="https://img.shields.io/pypi/v/changeloggh"></a>
 <a href="https://libraries.io/pypi/changeloggh"><img alt="Dependencies" src="https://img.shields.io/librariesio/release/pypi/changeloggh"></a>
 <a href="https://pypi.org/project/changeloggh"><img alt="Platform" src="https://img.shields.io/badge/platform-linux%20%7C%20osx-blueviolet"></a>
+</p>
 
 `changeloggh` is a command line tool
 to generate and administrate changelog files for GitHub
 according to https://keepachangelog.com/en/1.1.0/.
 
-<p align="center">
-<img width="45%" src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/md.png">
-<img width="45%" src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/json.png">
-</p>
+## Screenshots
 
-# Installation
+<table>
+  <tr>
+    <td>
+        <img  src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/md.png">
+    </td>
+    <td>
+        <img src="https://raw.githubusercontent.com/sauljabin/changeloggh/main/screenshots/json.png">
+    </td>
+  </tr>
+</table>
+
+## Installation
 
 ```sh
 pipx install changeloggh
