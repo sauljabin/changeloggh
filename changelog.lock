@@ -1,147 +1,155 @@
 {
-    "repository": "https://github.com/sauljabin/changeloggh",
-    "versions": [
+  "repository": "https://github.com/sauljabin/changeloggh",
+  "versions": [
+    {
+      "version": "Unreleased",
+      "changes": [
         {
-            "version": "Unreleased"
-        },
-        {
-            "version": "1.1.0",
-            "date": "2024-07-14",
-            "changes": [
-                {
-                    "type": "Changed",
-                    "entries": [
-                        "Help message",
-                        "Changed click to cloup"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "1.0.9",
-            "date": "2024-06-18",
-            "changes": [
-                {
-                    "type": "Fixed",
-                    "entries": [
-                        "update readme"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "1.0.8",
-            "date": "2024-06-18",
-            "changes": [
-                {
-                    "type": "Fixed",
-                    "entries": [
-                        "get version"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "1.0.5",
-            "date": "2023-11-12",
-            "changes": [
-                {
-                    "type": "Security",
-                    "entries": [
-                        "Update dependencies"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "1.0.4",
-            "date": "2023-04-01",
-            "changes": [
-                {
-                    "type": "Added",
-                    "entries": [
-                        "Update screenshots"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "1.0.3",
-            "date": "2023-03-23",
-            "changes": [
-                {
-                    "type": "Added",
-                    "entries": [
-                        "Update command"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "1.0.2",
-            "date": "2023-03-21",
-            "changes": [
-                {
-                    "type": "Fixed",
-                    "entries": [
-                        "Readme description"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "1.0.1",
-            "date": "2023-03-21",
-            "changes": [
-                {
-                    "type": "Fixed",
-                    "entries": [
-                        "Readme typo"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "1.0.0",
-            "date": "2023-03-21",
-            "changes": [
-                {
-                    "type": "Removed",
-                    "entries": [
-                        "Remove faker from dev"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "0.2.0",
-            "date": "2023-03-21",
-            "changes": [
-                {
-                    "type": "Added",
-                    "entries": [
-                        "Add change commands",
-                        "Release command",
-                        "Import command",
-                        "Latest command",
-                        "Print command",
-                        "Init Command",
-                        "Bump command"
-                    ]
-                }
-            ]
-        },
-        {
-            "version": "0.1.0",
-            "date": "2023-03-21",
-            "changes": [
-                {
-                    "type": "Added",
-                    "entries": [
-                        "Initial setup"
-                    ]
-                }
-            ]
+          "type": "Added",
+          "entries": [
+            "New option live, it allows you to interact with the changelog"
+          ]
         }
-    ]
+      ]
+    },
+    {
+      "version": "1.1.0",
+      "date": "2024-07-14",
+      "changes": [
+        {
+          "type": "Changed",
+          "entries": [
+            "Help message",
+            "Changed click to cloup"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "1.0.9",
+      "date": "2024-06-18",
+      "changes": [
+        {
+          "type": "Fixed",
+          "entries": [
+            "update readme"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "1.0.8",
+      "date": "2024-06-18",
+      "changes": [
+        {
+          "type": "Fixed",
+          "entries": [
+            "get version"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "1.0.5",
+      "date": "2023-11-12",
+      "changes": [
+        {
+          "type": "Security",
+          "entries": [
+            "Update dependencies"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "1.0.4",
+      "date": "2023-04-01",
+      "changes": [
+        {
+          "type": "Added",
+          "entries": [
+            "Update screenshots"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "1.0.3",
+      "date": "2023-03-23",
+      "changes": [
+        {
+          "type": "Added",
+          "entries": [
+            "Update command"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "1.0.2",
+      "date": "2023-03-21",
+      "changes": [
+        {
+          "type": "Fixed",
+          "entries": [
+            "Readme description"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "1.0.1",
+      "date": "2023-03-21",
+      "changes": [
+        {
+          "type": "Fixed",
+          "entries": [
+            "Readme typo"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "1.0.0",
+      "date": "2023-03-21",
+      "changes": [
+        {
+          "type": "Removed",
+          "entries": [
+            "Remove faker from dev"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.2.0",
+      "date": "2023-03-21",
+      "changes": [
+        {
+          "type": "Added",
+          "entries": [
+            "Add change commands",
+            "Release command",
+            "Import command",
+            "Latest command",
+            "Print command",
+            "Init Command",
+            "Bump command"
+          ]
+        }
+      ]
+    },
+    {
+      "version": "0.1.0",
+      "date": "2023-03-21",
+      "changes": [
+        {
+          "type": "Added",
+          "entries": [
+            "Initial setup"
+          ]
+        }
+      ]
+    }
+  ]
 }

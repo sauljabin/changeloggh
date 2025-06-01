@@ -89,6 +89,11 @@ Print CHANGELOG:
 changeloggh print --format <rich|json|text>
 ```
 
+Live CHANGELOG version:
+```shell
+changeloggh live
+```
+
 ## Development
 
 Installing poetry:

@@ -6,6 +6,9 @@ from cloup import Section
 from rich import print_json
 from rich.console import Console
 from rich.markdown import Markdown
+from textual.app import App, ComposeResult
+from textual.binding import Binding
+from textual.widgets import MarkdownViewer, Footer
 
 from changeloggh import VERSION
 from changeloggh.changelog import (
@@ -16,6 +19,7 @@ from changeloggh.changelog import (
     ChangeType,
     BumpRule,
     parse_changelog,
+    JSON_INDENT,
 )
 
 START = Section("Start a changelog file")
@@ -67,6 +71,34 @@ def init(force: bool, repository: str):
     changelog.save()
 
 
+@main.command("live", section=EXAMINE)
+def live():
+    """
+    Show a live version of the CHANGELOG.md file.
+    """
+
+    cl = load_changelog()
+
+    class MarkdownApp(App):
+        BINDINGS = [
+            Binding(key="ctrl+q", action="quit", description="Quit Viewer"),
+            Binding(
+                key="ctrl+t", action="toggle_table_of_contents", description="Toggle Navigation"
+            ),
+        ]
+
+        def compose(self) -> ComposeResult:
+            yield MarkdownViewer(cl.to_string(), show_table_of_contents=False)
+            yield Footer()
+
+        def action_toggle_table_of_contents(self) -> None:
+            markdown_viewer = self.query_one(MarkdownViewer)
+            markdown_viewer.show_table_of_contents = not markdown_viewer.show_table_of_contents
+
+    app = MarkdownApp()
+    app.run()
+
+
 @main.command("print", section=EXAMINE)
 @cloup.option(
     "--format",
@@ -89,7 +121,7 @@ def print_changelog(format: str):
         case "text":
             print(cl.to_string())
         case "json":
-            print_json(cl.to_json(), indent=4)
+            print_json(cl.to_json(), indent=JSON_INDENT)
 
 
 @main.command("added", section=ADD)
@@ -263,7 +295,7 @@ def release(version: str):
 )
 def import_md(force: bool):
     """
-    Import a MD file.
+    Import a markdown file.
     """
 
     if not force:
@@ -274,7 +306,7 @@ def import_md(force: bool):
 
     cl = parse_changelog()
     cl.save()
-    print_json(cl.to_json(), indent=4)
+    print_json(cl.to_json(), indent=JSON_INDENT)
 
 
 if __name__ == "__main__":

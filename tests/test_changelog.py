@@ -13,6 +13,7 @@ from changeloggh.changelog import (
     ChangeType,
     BumpRule,
     parse_changelog,
+    JSON_INDENT,
 )
 
 REPO_EXAMPLE = "https://github.com/sauljabin/changeloggh"
@@ -116,7 +117,7 @@ DICT_EXAMPLE = {
 }
 
 JSON_EXAMPLE = json.dumps(DICT_EXAMPLE)
-JSON_INDENT_EXAMPLE = json.dumps(DICT_EXAMPLE, indent=4)
+JSON_INDENT_EXAMPLE = json.dumps(DICT_EXAMPLE, indent=JSON_INDENT)
 
 
 class TestApp(TestCase):
@@ -138,7 +139,7 @@ class TestApp(TestCase):
 
     def test_json_indent(self):
         cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)
-        self.assertEqual(JSON_INDENT_EXAMPLE, cl.to_json(indent=4))
+        self.assertEqual(JSON_INDENT_EXAMPLE, cl.to_json(indent=JSON_INDENT))
 
     def test_dict(self):
         cl = Changelog(repository=REPO_EXAMPLE, versions=VERSIONS_EXAMPLE)

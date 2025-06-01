@@ -20,6 +20,7 @@ requires-python = ">=3.10,<3.14"
 dependencies = [
     "cloup>=3",
     "rich>=14",
+    "textual>=3",
     "jinja2>=3",
     "semver>=3",
     "poetry-core (>=2.0.0,<3.0.0)",
@@ -36,7 +37,7 @@ clgh = "changeloggh.cli:main"
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
 black = "*"
-coverage = {extras = ["toml"], version = "*"}
+coverage = { extras = ["toml"], version = "*" }
 toml = "*"
 pre-commit = "*"
 

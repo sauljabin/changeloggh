@@ -9,6 +9,7 @@ from semver import VersionInfo
 from changeloggh.url_utils import url_join
 from changeloggh.version_utils import version_comparator, change_comparator
 
+JSON_INDENT = 2
 CHANGELOG_PATH = "./CHANGELOG.md"
 CHANGELOG_LOCK_PATH = "./changelog.lock"
 JINJA_TEMPLATE = """
@@ -177,7 +178,7 @@ class Changelog:
             file.write(self.to_string())
 
         with open(CHANGELOG_LOCK_PATH, "w") as file:
-            file.write(self.to_json(indent=4))
+            file.write(self.to_json(indent=JSON_INDENT))
 
     def add(self, change_type: ChangeType, entry: str):
         if self.versions is None:
