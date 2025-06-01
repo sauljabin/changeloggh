@@ -37,7 +37,6 @@ clgh = "changeloggh.cli:main"
 ruff = "*"
 black = "*"
 coverage = { extras = ["toml"], version = "*" }
-toml = "*"
 pre-commit = "*"
 
 [tool.black]
