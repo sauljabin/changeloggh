@@ -23,7 +23,6 @@ dependencies = [
     "textual>=3",
     "jinja2>=3",
     "semver>=3",
-    "poetry-core (>=2.0.0,<3.0.0)",
 ]
 
 [project.urls]
