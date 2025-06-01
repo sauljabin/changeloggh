@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-06-01
+
 ### Added
 
 - New option live, it allows you to interact with the changelog
@@ -84,7 +86,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial setup
 
-[Unreleased]: https://github.com/sauljabin/changeloggh/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/sauljabin/changeloggh/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/sauljabin/changeloggh/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/sauljabin/changeloggh/compare/v1.0.9...v1.1.0
 [1.0.9]: https://github.com/sauljabin/changeloggh/compare/v1.0.8...v1.0.9
 [1.0.8]: https://github.com/sauljabin/changeloggh/compare/v1.0.5...v1.0.8
