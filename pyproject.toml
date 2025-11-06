@@ -1,6 +1,6 @@
 [project]
 name = "changeloggh"
-version = "1.2.0"
+version = "1.2.1"
 description = "changeloggh is a command line tool that generates changelog files for github"
 authors = [{ name = "Saúl Piña", email = "sauljabin@gmail.com" }]
 license = { text = "MIT" }
